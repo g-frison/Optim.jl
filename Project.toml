@@ -1,6 +1,6 @@
-name = "Optim"
+name = "Optim_gf"
 uuid = "9822c692-7d69-11f1-8dcf-93fcc0a46661"
-version = "2.2.1.gf"
+version = "0.1.0"  
 
 [deps]
 ADTypes = "47edcb42-4c32-4615-8424-f2b9edc5f35b"

@@ -13,48 +13,48 @@ using StableRNGs
     x0 = randn(rng, n, m) + im * randn(rng, n, m)
 
     @testset "Stiefel, retraction = $retraction" for retraction in [:SVD, :CholQR]
-        manif = Optim.Stiefel(retraction)
+        manif = Optim_gf.Stiefel(retraction)
 
         # AcceleratedGradientDescent should be compatible also, but I haven't been able to make it converge
         @testset for ls in
             (LineSearches.BackTracking, LineSearches.HagerZhang, LineSearches.StrongWolfe, LineSearches.MoreThuente)
             @testset for method in (
-                Optim.GradientDescent,
-                Optim.ConjugateGradient,
-                Optim.LBFGS,
-                Optim.BFGS,
-                Optim.NGMRES,
-                Optim.OACCEL,
+                Optim_gf.GradientDescent,
+                Optim_gf.ConjugateGradient,
+                Optim_gf.LBFGS,
+                Optim_gf.BFGS,
+                Optim_gf.NGMRES,
+                Optim_gf.OACCEL,
             )
                 debug_printing && printstyled(
                     "Solver: $(summary(method())), linesearch: $(summary(ls()))\n",
                     color = :green,
                 )
-                res = Optim.optimize(
+                res = Optim_gf.optimize(
                     fmanif,
                     gmanif!,
                     x0,
                     method(manifold = manif, linesearch = ls()),
-                    Optim.Options(allow_f_increases = true, g_abstol = 1e-6),
+                    Optim_gf.Options(allow_f_increases = true, g_abstol = 1e-6),
                 )
                 debug_printing && printstyled("Iter\tf-calls\tg-calls\n", color = :green)
                 debug_printing && printstyled(
-                    "$(Optim.iterations(res))\t$(Optim.f_calls(res))\t$(Optim.g_calls(res))\n",
+                    "$(Optim_gf.iterations(res))\t$(Optim_gf.f_calls(res))\t$(Optim_gf.g_calls(res))\n",
                     color = :red,
                 )
-                if !Optim.converged(res)
+                if !Optim_gf.converged(res)
                     println(res)
                 end
-                @test Optim.converged(res)
+                @test Optim_gf.converged(res)
             end
         end
-        res = Optim.optimize(
+        res = Optim_gf.optimize(
             fmanif,
             gmanif!,
             x0,
-            Optim.MomentumGradientDescent(mu = 0.0, manifold = manif),
+            Optim_gf.MomentumGradientDescent(mu = 0.0, manifold = manif),
         )
-        @test Optim.converged(res)
+        @test Optim_gf.converged(res)
     end
 
     @testset "Power and Product" begin
@@ -62,23 +62,23 @@ using StableRNGs
         @views fprod(x) = fmanif(x[:, 1]) + fmanif(x[:, 2])
         @views gprod!(stor, x) =
             (gmanif!(stor[:, 1], x[:, 1]); gmanif!(stor[:, 2], x[:, 2]); stor)
-        m1 = Optim.PowerManifold(Optim.Sphere(), (n,), (2,))
+        m1 = Optim_gf.PowerManifold(Optim_gf.Sphere(), (n,), (2,))
         rng = StableRNG(0)
         x0 = randn(rng, n, 2) + im * randn(rng, n, 2)
-        res = Optim.optimize(fprod, gprod!, x0, Optim.ConjugateGradient(manifold = m1))
-        @test Optim.converged(res)
-        minpow = Optim.minimizer(res)
+        res = Optim_gf.optimize(fprod, gprod!, x0, Optim_gf.ConjugateGradient(manifold = m1))
+        @test Optim_gf.converged(res)
+        minpow = Optim_gf.minimizer(res)
 
         # Product
         @views fprod(x) = fmanif(x[1:n]) + fmanif(x[n+1:2n])
         @views gprod!(stor, x) =
             (gmanif!(stor[1:n], x[1:n]); gmanif!(stor[n+1:2n], x[n+1:2n]); stor)
-        m2 = Optim.ProductManifold(Optim.Sphere(), Optim.Sphere(), (n,), (n,))
+        m2 = Optim_gf.ProductManifold(Optim_gf.Sphere(), Optim_gf.Sphere(), (n,), (n,))
         rng = StableRNG(0)
         x0 = randn(rng, 2n) + im * randn(rng, 2n)
-        res = Optim.optimize(fprod, gprod!, x0, Optim.ConjugateGradient(manifold = m2))
-        @test Optim.converged(res)
-        minprod = Optim.minimizer(res)
+        res = Optim_gf.optimize(fprod, gprod!, x0, Optim_gf.ConjugateGradient(manifold = m2))
+        @test Optim_gf.converged(res)
+        minprod = Optim_gf.minimizer(res)
 
         # results should be exactly equal: same initial guess, same sequence of operations
         @test minpow[:, 1] == minprod[1:n]

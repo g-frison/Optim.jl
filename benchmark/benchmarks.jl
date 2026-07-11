@@ -17,7 +17,7 @@ tests = (;
         init_phi = () -> [1.0, 6.0],
         true_phi = () -> [0.0, 16.6],
         domain = () -> LinRange(-15.0, 15.0, 64),
-        options = () -> Optim.Options(iterations = 100),
+        options = () -> Optim_gf.Options(iterations = 100),
         optimizers = [
             :Adam,
             :AdaMax,

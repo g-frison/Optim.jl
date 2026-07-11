@@ -20,15 +20,15 @@
     op_res = optimize(f, g!, h!, initial_x; inplace = true)
 
     for op in (
-        Optim.minimizer,
-        Optim.minimum,
-        Optim.f_calls,
-        Optim.g_calls,
-        Optim.jvp_calls,
-        Optim.h_calls,
-        Optim.hvp_calls,
-        Optim.iterations,
-        Optim.converged,
+        Optim_gf.minimizer,
+        Optim_gf.minimum,
+        Optim_gf.f_calls,
+        Optim_gf.g_calls,
+        Optim_gf.jvp_calls,
+        Optim_gf.h_calls,
+        Optim_gf.hvp_calls,
+        Optim_gf.iterations,
+        Optim_gf.converged,
     )
         @test all(op(inp_res) .=== op(op_res))
     end

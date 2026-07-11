@@ -37,12 +37,12 @@ using Random
                 ),
                 (" WITHOUT", " WITH", " WITH Hessian", " WITH Hessian Prep"),
             )
-                results = Optim.optimize(
+                results = Optim_gf.optimize(
                     f,
                     g!,
                     copy(initial_x),
                     optimizer(P = P, precondprep = Prep),
-                    Optim.Options(
+                    Optim_gf.Options(
                         g_tol = GRTOL,
                         allow_f_increases = true,
                         iterations = 250000,
@@ -52,17 +52,17 @@ using Random
                     optimizer,
                     wwo,
                     " preconditioning : g_calls = ",
-                    Optim.g_calls(results),
+                    Optim_gf.g_calls(results),
                     ", f_calls = ",
-                    Optim.f_calls(results),
+                    Optim_gf.f_calls(results),
                     ", iterations = ",
-                    Optim.iterations(results),
+                    Optim_gf.iterations(results),
                 )
                 if (optimizer == GradientDescent) && (N > 15) && (P == ID)
                     debug_printing &&
                         println("    (gradient descent is not expected to converge)")
                 else
-                    @test Optim.converged(results)
+                    @test Optim_gf.converged(results)
                 end
             end
         end
@@ -83,8 +83,8 @@ using Random
         x, A = randn(2), Diagonal([1.0, 1.0])
         rosenbrock(x) = (1.0 - x[1])^2 + 100.0 * (x[2] - x[1]^2)^2
 
-        results1 = Optim.optimize(rosenbrock, x, method(P = A), Optim.Options())
-        results2 = Optim.optimize(rosenbrock, x, method(), Optim.Options())
+        results1 = Optim_gf.optimize(rosenbrock, x, method(P = A), Optim_gf.Options())
+        results2 = Optim_gf.optimize(rosenbrock, x, method(), Optim_gf.Options())
         # can differ because of a matrix multiplication and addition in the non-nothing case
         # but should be *very* small
         @test results1.minimum ≈ results2.minimum atol = 1e-16

@@ -16,8 +16,8 @@
             HVP[1] = 12.0 * (x[1] - 5.0)^2 * v[1]
         end
         d = TwiceDifferentiable(NLSolversBase.only_fg_and_hvp!(fg!, _hvp!), [0.0])
-        result = Optim.optimize(d, [0.0], Optim.KrylovTrustRegion())
-        @test norm(Optim.minimizer(result) - [5.0]) < 0.01
+        result = Optim_gf.optimize(d, [0.0], Optim_gf.KrylovTrustRegion())
+        @test norm(Optim_gf.minimizer(result) - [5.0]) < 0.01
 
         function fgh!(f, g, H, x)
             if H !== nothing
@@ -26,8 +26,8 @@
             return fg!(f, g, x)
         end
         d2 = TwiceDifferentiable(NLSolversBase.only_fgh!(fgh!), [0.0])
-        result = Optim.optimize(d2, [0.0], Optim.KrylovTrustRegion())
-        @test norm(Optim.minimizer(result) - [5.0]) < 0.01
+        result = Optim_gf.optimize(d2, [0.0], Optim_gf.KrylovTrustRegion())
+        @test norm(Optim_gf.minimizer(result) - [5.0]) < 0.01
     end
 
     @testset "Toy test problem 2" begin
@@ -49,11 +49,11 @@
             return mul!(HVP, Diagonal([1.0, eta]), v)
         end
 
-        d2 = Optim.TwiceDifferentiable(NLSolversBase.only_fg_and_hvp!(fg2!, _hvp2!), Float64[127, 921])
+        d2 = Optim_gf.TwiceDifferentiable(NLSolversBase.only_fg_and_hvp!(fg2!, _hvp2!), Float64[127, 921])
 
-        result = Optim.optimize(d2, Float64[127, 921], Optim.KrylovTrustRegion())
-        @test Optim.g_converged(result)
-        @test norm(Optim.minimizer(result) - [0.0, 0.0]) < 0.01
+        result = Optim_gf.optimize(d2, Float64[127, 921], Optim_gf.KrylovTrustRegion())
+        @test Optim_gf.g_converged(result)
+        @test norm(Optim_gf.minimizer(result) - [0.0, 0.0]) < 0.01
     end
 
     @testset "Stock test problems" begin
@@ -72,12 +72,12 @@
                     end
                     return _f === nothing ? nothing : MVP.objective(prob)(x)
                 end
-                ddf = Optim.TwiceDifferentiable(
+                ddf = Optim_gf.TwiceDifferentiable(
                     NLSolversBase.only_fg_and_hvp!(fg!, _hvp!),
                     prob.initial_x,
                 )
-                result = Optim.optimize(ddf, prob.initial_x, Optim.KrylovTrustRegion())
-                @test norm(Optim.minimizer(result) - prob.solutions) < 1e-2
+                result = Optim_gf.optimize(ddf, prob.initial_x, Optim_gf.KrylovTrustRegion())
+                @test norm(Optim_gf.minimizer(result) - prob.solutions) < 1e-2
             end
         end
     end

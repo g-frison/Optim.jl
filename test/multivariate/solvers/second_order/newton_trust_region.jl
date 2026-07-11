@@ -8,7 +8,7 @@ Random.seed!(3288)
         H = [0.945787 -3.07884; -3.07884 -1.27762]
 
         s = zeros(n)
-        m, interior = Optim.solve_tr_subproblem!(gr, H, 1.0, s, max_iters = 100)
+        m, interior = Optim_gf.solve_tr_subproblem!(gr, H, 1.0, s, max_iters = 100)
 
         for j = 1:10
             bad_s = rand(n)
@@ -27,7 +27,7 @@ Random.seed!(3288)
             H += H'
 
             s = zeros(n)
-            m, interior = Optim.solve_tr_subproblem!(gr, H, 1.0, s, max_iters = 100)
+            m, interior = Optim_gf.solve_tr_subproblem!(gr, H, 1.0, s, max_iters = 100)
 
             model(s2) = (gr' * s2) + 0.5 * (s2' * H * s2)
             @test model(s) <= model(zeros(n)) + 1e-8  # origin
@@ -63,7 +63,7 @@ Random.seed!(3288)
         # An interior solution
         delta = sqrt(s_norm2) + 1.0
         m, interior, lambda, hard_case, reached_solution =
-            Optim.solve_tr_subproblem!(gr, H, delta, s)
+            Optim_gf.solve_tr_subproblem!(gr, H, delta, s)
         @test interior
         @test !hard_case
         @test reached_solution
@@ -74,7 +74,7 @@ Random.seed!(3288)
         # A boundary solution
         delta = 0.5 * sqrt(s_norm2)
         m, interior, lambda, hard_case, reached_solution =
-            Optim.solve_tr_subproblem!(gr, H, delta, s)
+            Optim_gf.solve_tr_subproblem!(gr, H, delta, s)
         @test !interior
         @test !hard_case
         @test reached_solution
@@ -86,30 +86,30 @@ Random.seed!(3288)
 
         # Test the checking
         hard_case, lambda_index =
-            Optim.check_hard_case_candidate([-1.0, 2.0, 3.0], [0.0, 1.0, 1.0])
+            Optim_gf.check_hard_case_candidate([-1.0, 2.0, 3.0], [0.0, 1.0, 1.0])
         @test hard_case
         @test lambda_index == 2
 
         hard_case, lambda_index =
-            Optim.check_hard_case_candidate([-1.0, -1.0, 3.0], [0.0, 0.0, 1.0])
+            Optim_gf.check_hard_case_candidate([-1.0, -1.0, 3.0], [0.0, 0.0, 1.0])
         @test hard_case
         @test lambda_index == 3
 
         hard_case, lambda_index =
-            Optim.check_hard_case_candidate([-1.0, -1.0, -1.0], [0.0, 0.0, 0.0])
+            Optim_gf.check_hard_case_candidate([-1.0, -1.0, -1.0], [0.0, 0.0, 0.0])
         @test hard_case
         @test lambda_index == 4
 
         hard_case, lambda_index =
-            Optim.check_hard_case_candidate([1.0, 2.0, 3.0], [0.0, 1.0, 1.0])
+            Optim_gf.check_hard_case_candidate([1.0, 2.0, 3.0], [0.0, 1.0, 1.0])
         @test !hard_case
 
         hard_case, lambda_index =
-            Optim.check_hard_case_candidate([-1.0, -1.0, -1.0], [0.0, 0.0, 1.0])
+            Optim_gf.check_hard_case_candidate([-1.0, -1.0, -1.0], [0.0, 0.0, 1.0])
         @test !hard_case
 
         hard_case, lambda_index =
-            Optim.check_hard_case_candidate([-1.0, 2.0, 3.0], [1.0, 1.0, 1.0])
+            Optim_gf.check_hard_case_candidate([-1.0, 2.0, 3.0], [1.0, 1.0, 1.0])
         @test !hard_case
 
         # Now check an actual hard case problem
@@ -126,7 +126,7 @@ Random.seed!(3288)
 
         delta = 0.5 * sqrt(s_norm2)
         m, interior, lambda, hard_case, reached_solution =
-            Optim.solve_tr_subproblem!(gr, H, delta, s)
+            Optim_gf.solve_tr_subproblem!(gr, H, delta, s)
         @test !interior
         @test hard_case
         @test reached_solution
@@ -152,12 +152,12 @@ Random.seed!(3288)
         d = TwiceDifferentiable(f, g!, h!, [0.0])
 
         options =
-            Optim.Options(store_trace = false, show_trace = false, extended_trace = true)
-        results = Optim.optimize(d, [0.0], NewtonTrustRegion(), options)
-        @test_throws ErrorException Optim.x_trace(results)
+            Optim_gf.Options(store_trace = false, show_trace = false, extended_trace = true)
+        results = Optim_gf.optimize(d, [0.0], NewtonTrustRegion(), options)
+        @test_throws ErrorException Optim_gf.x_trace(results)
         @test length(results.trace) == 0
-        @test Optim.g_converged(results)
-        @test norm(Optim.minimizer(results) - [5.0]) < 0.01
+        @test Optim_gf.g_converged(results)
+        @test norm(Optim_gf.minimizer(results) - [5.0]) < 0.01
         test_summary(results, "Newton's Method (Trust Region)")
 
         eta = 0.9
@@ -180,11 +180,11 @@ Random.seed!(3288)
 
         d = TwiceDifferentiable(f_2, g!_2, h!_2, Float64[127, 921])
 
-        results = Optim.optimize(d, Float64[127, 921], NewtonTrustRegion())
-        @test Optim.g_converged(results)
-        @test norm(Optim.minimizer(results) - [0.0, 0.0]) < 0.01
+        results = Optim_gf.optimize(d, Float64[127, 921], NewtonTrustRegion())
+        @test Optim_gf.g_converged(results)
+        @test norm(Optim_gf.minimizer(results) - [0.0, 0.0]) < 0.01
 
-        # Test Optim.newton for all twice differentiable functions in
+        # Test Optim_gf.newton for all twice differentiable functions in
         # MultivariateProblems.UnconstrainedProblems.examples
         @testset "Optim problems" begin
             run_optim_tests(
@@ -198,7 +198,7 @@ Random.seed!(3288)
 
     @testset "PR #341" begin
         # verify that no PosDef exception is thrown
-        Optim.solve_tr_subproblem!([0, 1.0], [-1000 0; 0.0 -999], 1e-2, ones(2))
+        Optim_gf.solve_tr_subproblem!([0, 1.0], [-1000 0; 0.0 -999], 1e-2, ones(2))
     end
 
     @testset "Handle Inf without erroring" begin
@@ -212,7 +212,7 @@ Random.seed!(3288)
             ones(10),
             NewtonTrustRegion(),
         )
-        @test !(Optim.f_converged(o) || Optim.g_converged(o) || Optim.x_converged(o))
+        @test !(Optim_gf.f_converged(o) || Optim_gf.g_converged(o) || Optim_gf.x_converged(o))
     end
 
     @testset "delta_min" begin
@@ -252,20 +252,20 @@ Random.seed!(3288)
         @test_throws DomainError NewtonTrustRegion(delta_min = -1.0)
         @test iszero(NewtonTrustRegion().delta_min)
 
-        res = Optim.optimize(
+        res = Optim_gf.optimize(
             t -> -ll(t[1]),
             [2.1],
             NewtonTrustRegion(),
-            Optim.Options(show_trace = false, allow_f_increases = false, g_tol = 1e-5),
+            Optim_gf.Options(show_trace = false, allow_f_increases = false, g_tol = 1e-5),
         )
-        @test Optim.termination_code(res) == Optim.TerminationCode.NoXChange
+        @test Optim_gf.termination_code(res) == Optim_gf.TerminationCode.NoXChange
 
-        res = Optim.optimize(
+        res = Optim_gf.optimize(
             t -> -ll(t[1]),
             [2.1],
             NewtonTrustRegion(; delta_min = 1e-8),
-            Optim.Options(show_trace = false, allow_f_increases = false, g_tol = 1e-5),
+            Optim_gf.Options(show_trace = false, allow_f_increases = false, g_tol = 1e-5),
         )
-        @test Optim.termination_code(res) == Optim.TerminationCode.SmallTrustRegionRadius
+        @test Optim_gf.termination_code(res) == Optim_gf.TerminationCode.SmallTrustRegionRadius
     end
 end

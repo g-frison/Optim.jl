@@ -6,10 +6,10 @@ import LBFGSB as RefLBFGSB
     feasible(x, l, u) = all(l .<= x .<= u)
 
     # Run the whole suite against both the efficient `LBFGSB` and the internal
-    # reference `Optim.SimpleLBFGSBReference.SimpleLBFGSB`. Each variant is the
+    # reference `Optim_gf.SimpleLBFGSBReference.SimpleLBFGSB`. Each variant is the
     # solver type itself, so `V(m = m)` constructs it; its line searches live in
     # the type's own module (`parentmodule(V).HZAW()` / `.MTLS()`).
-    variants = (LBFGSB, Optim.SimpleLBFGSBReference.SimpleLBFGSB)
+    variants = (LBFGSB, Optim_gf.SimpleLBFGSBReference.SimpleLBFGSB)
 
     @testset "$(nameof(V))" for V in variants
         @testset "unconstrained problems with slack bounds" begin
@@ -20,9 +20,9 @@ import LBFGSB as RefLBFGSB
                 f = MVP.objective(prob)
                 l = min.(xtrue, prob.initial_x) .- 1
                 u = max.(xtrue, prob.initial_x) .+ 1
-                res = optimize(f, l, u, prob.initial_x, V(), Optim.Options(g_abstol = 1e-8))
-                @test feasible(Optim.minimizer(res), l, u)
-                @test abs(prob.minimum - Optim.minimum(res)) < 1e-6
+                res = optimize(f, l, u, prob.initial_x, V(), Optim_gf.Options(g_abstol = 1e-8))
+                @test feasible(Optim_gf.minimizer(res), l, u)
+                @test abs(prob.minimum - Optim_gf.minimum(res)) < 1e-6
             end
         end
 
@@ -31,8 +31,8 @@ import LBFGSB as RefLBFGSB
             l = [-2.0, -2.0]
             u = [2.0, 2.0]
             res = optimize(g, l, u, [0.0, 0.0], V())
-            @test feasible(Optim.minimizer(res), l, u)
-            @test Optim.minimizer(res) ≈ [2.0, -2.0] atol = 1e-6
+            @test feasible(Optim_gf.minimizer(res), l, u)
+            @test Optim_gf.minimizer(res) ≈ [2.0, -2.0] atol = 1e-6
         end
 
         @testset "agreement with Fminbox(LBFGS())" begin
@@ -42,8 +42,8 @@ import LBFGSB as RefLBFGSB
             x0 = [-1.2, 1.0]
             rb = optimize(rosen, l, u, x0, V())
             rf = optimize(rosen, l, u, x0, Fminbox(LBFGS()))
-            @test Optim.minimizer(rb) ≈ [1.0, 1.0] atol = 1e-4
-            @test Optim.minimizer(rb) ≈ Optim.minimizer(rf) atol = 1e-3
+            @test Optim_gf.minimizer(rb) ≈ [1.0, 1.0] atol = 1e-4
+            @test Optim_gf.minimizer(rb) ≈ Optim_gf.minimizer(rf) atol = 1e-3
         end
 
         @testset "line searches" begin
@@ -53,8 +53,8 @@ import LBFGSB as RefLBFGSB
             x0 = [-1.2, 1.0]
             for ls in (parentmodule(V).HZAW(), parentmodule(V).MTLS())
                 res = optimize(rosen, l, u, x0, V(linesearch = ls))
-                @test feasible(Optim.minimizer(res), l, u)
-                @test Optim.minimizer(res) ≈ [1.0, 1.0] atol = 1e-4
+                @test feasible(Optim_gf.minimizer(res), l, u)
+                @test Optim_gf.minimizer(res) ≈ [1.0, 1.0] atol = 1e-4
             end
         end
 
@@ -62,27 +62,27 @@ import LBFGSB as RefLBFGSB
             f(x) = sum(abs2, x)
             x0 = [1.0, -2.0, 3.0]
             res = optimize(f, -5.0, 5.0, x0, V())
-            @test Optim.converged(res)
-            @test Optim.minimizer(res) ≈ zeros(3) atol = 1e-6
+            @test Optim_gf.converged(res)
+            @test Optim_gf.minimizer(res) ≈ zeros(3) atol = 1e-6
         end
 
         @testset "one-sided bounds and fixed variables" begin
             g(x) = (x[1] - 3.0)^2 + (x[2] + 4.0)^2
             res = optimize(g, [1.0, -Inf], [Inf, Inf], [3.0, 0.0], V())
-            @test Optim.minimizer(res) ≈ [3.0, -4.0] atol = 1e-6
+            @test Optim_gf.minimizer(res) ≈ [3.0, -4.0] atol = 1e-6
 
             res2 = optimize(g, [1.0, -10.0], [1.0, 10.0], [1.0, 0.0], V())
-            @test Optim.minimizer(res2)[1] ≈ 1.0 atol = 1e-8
-            @test Optim.minimizer(res2)[2] ≈ -4.0 atol = 1e-6
+            @test Optim_gf.minimizer(res2)[1] ≈ 1.0 atol = 1e-8
+            @test Optim_gf.minimizer(res2)[2] ≈ -4.0 atol = 1e-6
         end
 
         @testset "type genericity" begin
             f(x) = sum(abs2, x)
             for ls in (parentmodule(V).HZAW(), parentmodule(V).MTLS())
                 res32 = optimize(f, fill(-5.0f0, 3), fill(5.0f0, 3), Float32[1, -2, 3], V(linesearch = ls))
-                @test eltype(Optim.minimizer(res32)) == Float32
-                @test typeof(Optim.minimum(res32)) == Float32
-                @test Optim.minimum(res32) < 1.0f-8
+                @test eltype(Optim_gf.minimizer(res32)) == Float32
+                @test typeof(Optim_gf.minimum(res32)) == Float32
+                @test Optim_gf.minimum(res32) < 1.0f-8
             end
         end
 
@@ -90,13 +90,13 @@ import LBFGSB as RefLBFGSB
             rosen(x) = (1.0 - x[1])^2 + 100.0 * (x[2] - x[1]^2)^2
             l = [-2.0, -2.0]
             u = [2.0, 2.0]
-            capped = optimize(rosen, l, u, [-1.2, 1.0], V(), Optim.Options(iterations = 2))
-            @test Optim.iterations(capped) <= 2
-            @test !Optim.converged(capped)
+            capped = optimize(rosen, l, u, [-1.2, 1.0], V(), Optim_gf.Options(iterations = 2))
+            @test Optim_gf.iterations(capped) <= 2
+            @test !Optim_gf.converged(capped)
 
             calls = Ref(0)
             cb = state -> (calls[] += 1; state.iteration >= 3)
-            optimize(rosen, l, u, [-1.2, 1.0], V(), Optim.Options(callback = cb))
+            optimize(rosen, l, u, [-1.2, 1.0], V(), Optim_gf.Options(callback = cb))
             @test calls[] >= 1
         end
 
@@ -113,11 +113,11 @@ import LBFGSB as RefLBFGSB
             l = fill(-1.0, n)
             u = fill(1.0, n)
             xstar = clamp.(c, l, u)
-            res = optimize(f, l, u, zeros(n), V(clip_subspace = clip), Optim.Options(g_abstol = 1e-8))
-            @test feasible(Optim.minimizer(res), l, u)
-            @test Optim.minimizer(res) ≈ xstar atol = 1e-6
-            @test any(Optim.minimizer(res) .≈ -1.0)
-            @test any(Optim.minimizer(res) .≈ 1.0)
+            res = optimize(f, l, u, zeros(n), V(clip_subspace = clip), Optim_gf.Options(g_abstol = 1e-8))
+            @test feasible(Optim_gf.minimizer(res), l, u)
+            @test Optim_gf.minimizer(res) ≈ xstar atol = 1e-6
+            @test any(Optim_gf.minimizer(res) .≈ -1.0)
+            @test any(Optim_gf.minimizer(res) .≈ 1.0)
         end
 
         @testset "iterate stays strictly in the box at active bounds" begin
@@ -127,14 +127,14 @@ import LBFGSB as RefLBFGSB
             g(x) = (x[1] - 3.0)^2 + (x[2] + 4.0)^2   # unconstrained min [3, -4]
             l2, u2 = [-2.0, -2.0], [2.0, 2.0]
             r1 = optimize(g, l2, u2, [0.0, 0.0], V())
-            @test all(l2 .<= Optim.minimizer(r1) .<= u2)   # strict, no tolerance
+            @test all(l2 .<= Optim_gf.minimizer(r1) .<= u2)   # strict, no tolerance
 
             n = 20
             c = collect(range(-3.0, 3.0; length = n))     # ~2/3 of bounds active
             f(x) = sum((x .- c) .^ 2)
             lo, hi = fill(-1.0, n), fill(1.0, n)
-            r2 = optimize(f, lo, hi, zeros(n), V(), Optim.Options(g_abstol = 1e-8))
-            x2 = Optim.minimizer(r2)
+            r2 = optimize(f, lo, hi, zeros(n), V(), Optim_gf.Options(g_abstol = 1e-8))
+            x2 = Optim_gf.minimizer(r2)
             @test all(lo .<= x2 .<= hi)                    # strict, no tolerance
             # every coordinate is exactly on a bound or strictly interior
             @test all(@. (x2 == -1.0) | (x2 == 1.0) | (-1.0 < x2 < 1.0))
@@ -147,15 +147,15 @@ import LBFGSB as RefLBFGSB
             l = fill(-1.0, n)
             u = fill(1.0, n)
             res = optimize(f, l, u, fill(-1.0, n), V())
-            @test feasible(Optim.minimizer(res), l, u)
-            @test Optim.minimizer(res) ≈ clamp.(c, l, u) atol = 1e-6
+            @test feasible(Optim_gf.minimizer(res), l, u)
+            @test Optim_gf.minimizer(res) ≈ clamp.(c, l, u) atol = 1e-6
         end
 
         @testset "memory length m=$m" for m in (2, 4, 20)
             rosen(x) = (1.0 - x[1])^2 + 100.0 * (x[2] - x[1]^2)^2
-            res = optimize(rosen, [-2.0, -2.0], [2.0, 2.0], [-1.2, 1.0], V(m = m), Optim.Options(iterations = 2000, g_abstol = 1e-8))
-            @test Optim.converged(res)
-            @test Optim.minimizer(res) ≈ [1.0, 1.0] atol = 1e-4
+            res = optimize(rosen, [-2.0, -2.0], [2.0, 2.0], [-1.2, 1.0], V(m = m), Optim_gf.Options(iterations = 2000, g_abstol = 1e-8))
+            @test Optim_gf.converged(res)
+            @test Optim_gf.minimizer(res) ≈ [1.0, 1.0] atol = 1e-4
         end
 
         @testset "memory length m=1 reaches the minimizer" begin
@@ -164,7 +164,7 @@ import LBFGSB as RefLBFGSB
             # Fortran reference behaves the same); the minimizer is still reached.
             rosen(x) = (1.0 - x[1])^2 + 100.0 * (x[2] - x[1]^2)^2
             res = optimize(rosen, [-2.0, -2.0], [2.0, 2.0], [-1.2, 1.0], V(m = 1))
-            @test Optim.minimizer(res) ≈ [1.0, 1.0] atol = 1e-4
+            @test Optim_gf.minimizer(res) ≈ [1.0, 1.0] atol = 1e-4
         end
 
         @testset "tracing" begin
@@ -173,15 +173,15 @@ import LBFGSB as RefLBFGSB
             u = [2.0, 2.0]
 
             ext = optimize(rosen, l, u, [-1.2, 1.0], V(),
-                Optim.Options(store_trace = true, extended_trace = true))
-            tr = Optim.trace(ext)
+                Optim_gf.Options(store_trace = true, extended_trace = true))
+            tr = Optim_gf.trace(ext)
             @test length(tr) >= 1
             @test isfinite(tr[end].g_norm)
             @test haskey(tr[end].metadata, "x")
             @test haskey(tr[end].metadata, "g(x)")
 
-            plain = optimize(rosen, l, u, [-1.2, 1.0], V(), Optim.Options(store_trace = true))
-            @test !haskey(Optim.trace(plain)[end].metadata, "x")
+            plain = optimize(rosen, l, u, [-1.2, 1.0], V(), Optim_gf.Options(store_trace = true))
+            @test !haskey(Optim_gf.trace(plain)[end].metadata, "x")
         end
 
         @testset "termination by limits" begin
@@ -190,17 +190,17 @@ import LBFGSB as RefLBFGSB
             u = [2.0, 2.0]
             x0 = [-1.2, 1.0]
 
-            r_f = optimize(rosen, l, u, x0, V(), Optim.Options(f_calls_limit = 5))
-            @test !Optim.converged(r_f)
-            @test r_f.termination_code == Optim.TerminationCode.ObjectiveCalls
+            r_f = optimize(rosen, l, u, x0, V(), Optim_gf.Options(f_calls_limit = 5))
+            @test !Optim_gf.converged(r_f)
+            @test r_f.termination_code == Optim_gf.TerminationCode.ObjectiveCalls
 
-            r_g = optimize(rosen, l, u, x0, V(), Optim.Options(g_calls_limit = 5))
-            @test !Optim.converged(r_g)
-            @test r_g.termination_code == Optim.TerminationCode.GradientCalls
+            r_g = optimize(rosen, l, u, x0, V(), Optim_gf.Options(g_calls_limit = 5))
+            @test !Optim_gf.converged(r_g)
+            @test r_g.termination_code == Optim_gf.TerminationCode.GradientCalls
 
-            r_i = optimize(rosen, l, u, x0, V(), Optim.Options(iterations = 3))
-            @test Optim.iterations(r_i) == 3
-            @test r_i.termination_code == Optim.TerminationCode.Iterations
+            r_i = optimize(rosen, l, u, x0, V(), Optim_gf.Options(iterations = 3))
+            @test Optim_gf.iterations(r_i) == 3
+            @test r_i.termination_code == Optim_gf.TerminationCode.Iterations
         end
 
         @testset "termination codes for x/f tolerances" begin
@@ -214,21 +214,21 @@ import LBFGSB as RefLBFGSB
             u = [2.0, 2.0]
             x0 = [-1.2, 1.0]
 
-            r_f = optimize(rosen, g!, l, u, x0, V(), Optim.Options(g_abstol = 0.0, f_abstol = 1e-6))
-            @test Optim.converged(r_f)
-            @test r_f.termination_code == Optim.TerminationCode.SmallObjectiveChange
+            r_f = optimize(rosen, g!, l, u, x0, V(), Optim_gf.Options(g_abstol = 0.0, f_abstol = 1e-6))
+            @test Optim_gf.converged(r_f)
+            @test r_f.termination_code == Optim_gf.TerminationCode.SmallObjectiveChange
 
-            r_x = optimize(rosen, g!, l, u, x0, V(), Optim.Options(g_abstol = 0.0, x_abstol = 1e-4))
-            @test Optim.converged(r_x)
-            @test r_x.termination_code == Optim.TerminationCode.SmallXChange
+            r_x = optimize(rosen, g!, l, u, x0, V(), Optim_gf.Options(g_abstol = 0.0, x_abstol = 1e-4))
+            @test Optim_gf.converged(r_x)
+            @test r_x.termination_code == Optim_gf.TerminationCode.SmallXChange
         end
 
         @testset "BigFloat precision" begin
             f(x) = sum(abs2, x)
             res = optimize(f, fill(big(-5.0), 3), fill(big(5.0), 3), big.([1.0, -2.0, 3.0]),
-                V(), Optim.Options(g_abstol = big(1e-20)))
-            @test eltype(Optim.minimizer(res)) == BigFloat
-            @test Optim.minimum(res) < big(1e-18)
+                V(), Optim_gf.Options(g_abstol = big(1e-20)))
+            @test eltype(Optim_gf.minimizer(res)) == BigFloat
+            @test Optim_gf.minimum(res) < big(1e-18)
         end
 
         @testset "active set under $T" for T in (Float32, BigFloat)
@@ -244,12 +244,12 @@ import LBFGSB as RefLBFGSB
             u = fill(T(1), n)
             xstar = clamp.(c, l, u)
             gtol, atol = T === BigFloat ? (T(1e-20), T(1e-12)) : (1.0f-5, 1.0f-4)
-            res = optimize(f, l, u, zeros(T, n), V(), Optim.Options(g_abstol = gtol))
-            @test eltype(Optim.minimizer(res)) == T
-            @test feasible(Optim.minimizer(res), l, u)
-            @test Optim.minimizer(res) ≈ xstar atol = atol
-            @test any(Optim.minimizer(res) .≈ T(-1))   # lower bounds active
-            @test any(Optim.minimizer(res) .≈ T(1))    # upper bounds active
+            res = optimize(f, l, u, zeros(T, n), V(), Optim_gf.Options(g_abstol = gtol))
+            @test eltype(Optim_gf.minimizer(res)) == T
+            @test feasible(Optim_gf.minimizer(res), l, u)
+            @test Optim_gf.minimizer(res) ≈ xstar atol = atol
+            @test any(Optim_gf.minimizer(res) .≈ T(-1))   # lower bounds active
+            @test any(Optim_gf.minimizer(res) .≈ T(1))    # upper bounds active
         end
 
         @testset "cross-check vs reference LBFGSB.jl (Fortran)" begin
@@ -297,11 +297,11 @@ import LBFGSB as RefLBFGSB
                     )
 
                     g! = (G, x) -> copyto!(G, p.grad(x))
-                    res = optimize(p.fval, g!, p.l, p.u, p.x0, V(), Optim.Options(g_abstol = 1e-9))
+                    res = optimize(p.fval, g!, p.l, p.u, p.x0, V(), Optim_gf.Options(g_abstol = 1e-9))
 
-                    @test feasible(Optim.minimizer(res), p.l, p.u)
-                    @test Optim.minimizer(res) ≈ xref atol = 1e-4
-                    @test Optim.minimum(res) ≈ fref atol = 1e-8 rtol = 1e-6
+                    @test feasible(Optim_gf.minimizer(res), p.l, p.u)
+                    @test Optim_gf.minimizer(res) ≈ xref atol = 1e-4
+                    @test Optim_gf.minimum(res) ≈ fref atol = 1e-8 rtol = 1e-6
                 end
             end
         end

@@ -61,19 +61,19 @@
     )
         fcounter(true)
         gcounter(true)
-        res = Optim.optimize(f, g!, prob.initial_x, solver(linesearch = ls))
-        @test fcount == Optim.f_calls(res)
-        @test gcount == Optim.g_calls(res)
+        res = Optim_gf.optimize(f, g!, prob.initial_x, solver(linesearch = ls))
+        @test fcount == Optim_gf.f_calls(res)
+        @test gcount == Optim_gf.g_calls(res)
     end
 
     for solver in (Newton(linesearch = ls), NewtonTrustRegion())
         fcounter(true)
         gcounter(true)
         hcounter(true)
-        res = Optim.optimize(f, g!, h!, prob.initial_x, solver)
-        @test fcount == Optim.f_calls(res)
-        @test gcount == Optim.g_calls(res)
-        @test hcount == Optim.h_calls(res)
+        res = Optim_gf.optimize(f, g!, h!, prob.initial_x, solver)
+        @test fcount == Optim_gf.f_calls(res)
+        @test gcount == Optim_gf.g_calls(res)
+        @test hcount == Optim_gf.h_calls(res)
     end
 
     # define fg! and hv! for KrylovTrustRegion
@@ -90,14 +90,14 @@
         out .= H * v
     end
     begin
-        solver = Optim.KrylovTrustRegion()
+        solver = Optim_gf.KrylovTrustRegion()
         fcounter(true)
         gcounter(true)
         hcounter(true)
-        df = Optim.TwiceDifferentiable(NLSolversBase.only_fg_and_hvp!(fg!, _hvp!), prob.initial_x)
-        res = Optim.optimize(df, prob.initial_x, solver)
-        @test fcount == Optim.f_calls(res)
-        @test gcount == Optim.g_calls(res)
-        @test hcount == Optim.hvp_calls(res)
+        df = Optim_gf.TwiceDifferentiable(NLSolversBase.only_fg_and_hvp!(fg!, _hvp!), prob.initial_x)
+        res = Optim_gf.optimize(df, prob.initial_x, solver)
+        @test fcount == Optim_gf.f_calls(res)
+        @test gcount == Optim_gf.g_calls(res)
+        @test hcount == Optim_gf.hvp_calls(res)
     end
 end

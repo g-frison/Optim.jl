@@ -42,9 +42,9 @@ end
     ub = fill(1.1, 2)
     od = OnceDifferentiable(exponential, initial_x)
     optimize(od, lb, ub, initial_x, IPNewton())
-    optimize(od, lb, ub, initial_x, IPNewton(), Optim.Options())
+    optimize(od, lb, ub, initial_x, IPNewton(), Optim_gf.Options())
     optimize(exponential, lb, ub, initial_x, IPNewton())
-    optimize(exponential, lb, ub, initial_x, IPNewton(), Optim.Options())
+    optimize(exponential, lb, ub, initial_x, IPNewton(), Optim_gf.Options())
     optimize(exponential, exponential_gradient!, lb, ub, initial_x, IPNewton())
     optimize(
         exponential,
@@ -53,7 +53,7 @@ end
         ub,
         initial_x,
         IPNewton(),
-        Optim.Options(),
+        Optim_gf.Options(),
     )
     optimize(
         exponential,
@@ -72,10 +72,10 @@ end
         ub,
         initial_x,
         IPNewton(),
-        Optim.Options(),
+        Optim_gf.Options(),
     )
     optimize(TwiceDifferentiable(od, initial_x), lb, ub, initial_x)
-    optimize(TwiceDifferentiable(od, initial_x), lb, ub, initial_x, Optim.Options())
+    optimize(TwiceDifferentiable(od, initial_x), lb, ub, initial_x, Optim_gf.Options())
 end
 
 @testset "non-terminating line search (αmax -> 0)" begin
@@ -127,9 +127,9 @@ end
     # The real regression check is that this call returns at all (no hang).
     local res
     elapsed = @elapsed(res = optimize(obj, con, α₀, IPNewton()))
-    @test Optim.iterations(res) <= 1000          # terminated within the default iteration cap
-    @test isfinite(Optim.minimum(res))
-    @test all(isfinite, Optim.minimizer(res))
+    @test Optim_gf.iterations(res) <= 1000          # terminated within the default iteration cap
+    @test isfinite(Optim_gf.minimum(res))
+    @test all(isfinite, Optim_gf.minimizer(res))
     # With the fix this converges in well under a second; the previous behaviour
     # was a hang of many minutes. A generous bound still flags a regression.
     @test elapsed < 60

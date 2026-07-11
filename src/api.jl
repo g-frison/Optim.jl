@@ -99,7 +99,7 @@ g_norm_trace(r::OptimizationResults) =
     error("g_norm_trace is not implemented for $(summary(r)).")
 g_norm_trace(r::MultivariateOptimizationResults) = [state.g_norm for state in trace(r)]
 
-# TODO: Overload `NLSolversBase.xxx` instead of defining separate `Optim.xxx` methods?
+# TODO: Overload `NLSolversBase.xxx` instead of defining separate `Optim_gf.xxx` methods?
 f_calls(r::OptimizationResults) = r.f_calls
 g_calls(r::OptimizationResults) = error(LazyString("`g_calls` is not implemented for ", summary(r), "."))
 g_calls(r::MultivariateOptimizationResults) = r.g_calls

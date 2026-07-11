@@ -6,9 +6,9 @@
     end
 
     initial_x = [1.0]
-    options = Optim.Options(show_trace = debug_printing, allow_f_increases = true)
-    results = Optim.optimize(f, g!, initial_x, AcceleratedGradientDescent(), options)
-    @test norm(Optim.minimum(results)) < 1e-6
+    options = Optim_gf.Options(show_trace = debug_printing, allow_f_increases = true)
+    results = Optim_gf.optimize(f, g!, initial_x, AcceleratedGradientDescent(), options)
+    @test norm(Optim_gf.minimum(results)) < 1e-6
     test_summary(results, "Accelerated Gradient Descent")
 
     # TODO: Check why skip problems fail

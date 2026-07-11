@@ -10,12 +10,12 @@
     prob = MultivariateProblems.UnconstrainedProblems.examples["Rosenbrock"]
     f_prob = MVP.objective(prob)
     for res in (
-        Optim.optimize(f_prob, prob.initial_x, NelderMead()),
-        Optim.optimize(f_prob, prob.initial_x, SimulatedAnnealing()),
-        Optim.optimize(MVP.objective(prob), MVP.gradient(prob), prob.initial_x, LBFGS()),
+        Optim_gf.optimize(f_prob, prob.initial_x, NelderMead()),
+        Optim_gf.optimize(f_prob, prob.initial_x, SimulatedAnnealing()),
+        Optim_gf.optimize(MVP.objective(prob), MVP.gradient(prob), prob.initial_x, LBFGS()),
     )
-        @test typeof(f_prob(prob.initial_x)) == typeof(Optim.minimum(res))
-        @test eltype(prob.initial_x) == eltype(Optim.minimizer(res))
+        @test typeof(f_prob(prob.initial_x)) == typeof(Optim_gf.minimum(res))
+        @test eltype(prob.initial_x) == eltype(Optim_gf.minimizer(res))
 
         io = IOBuffer()
         show(io, res)
@@ -40,16 +40,16 @@
     end
 
     io = IOBuffer()
-    res = show(io, MIME"text/plain"(), Optim.Options(x_abstol = 10.0))
+    res = show(io, MIME"text/plain"(), Optim_gf.Options(x_abstol = 10.0))
     @test String(take!(io)) |> contains("x_abstol = 10.0")
 
     # inheriting update from previously defined `Options`
-    opts1 = Optim.Options(; x_abstol = 1e-3, f_abstol = 1e-6, iterations = 1000)
-    opts2 = Optim.Options(opts1; x_abstol = 1e-4, f_calls_limit = 100)
+    opts1 = Optim_gf.Options(; x_abstol = 1e-3, f_abstol = 1e-6, iterations = 1000)
+    opts2 = Optim_gf.Options(opts1; x_abstol = 1e-4, f_calls_limit = 100)
     @test opts2.x_abstol == 1e-4 && opts2.x_abstol != opts1.x_abstol
     @test opts2.f_calls_limit == 100 && opts2.f_calls_limit != opts1.f_calls_limit
     @test opts2.f_abstol == opts1.f_abstol == 1e-6
     @test opts2.iterations == opts1.iterations == 1000
-    @test_throws MethodError Optim.Options(opts1; invalid_keyword=1)
-    @test Optim.Options(opts1) == opts1
+    @test_throws MethodError Optim_gf.Options(opts1; invalid_keyword=1)
+    @test Optim_gf.Options(opts1) == opts1
 end

@@ -17,10 +17,10 @@
                 alphaguess = LineSearches.InitialStatic(alpha = alpha),
                 linesearch = LineSearches.Static(),
             )
-            opts = Optim.Options(iterations = 1, allow_f_increases = allow)
+            opts = Optim_gf.Options(iterations = 1, allow_f_increases = allow)
             res = optimize(f, g!, [0.5], method, opts)
 
-            @test minimizers[k] == Optim.minimizer(res)[1]
+            @test minimizers[k] == Optim_gf.minimizer(res)[1]
         end
     end
 end

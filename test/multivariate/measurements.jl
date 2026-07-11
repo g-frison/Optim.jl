@@ -7,7 +7,7 @@ import Measurements
     resmes = optimize(f, xmes)
     resfloat = optimize(f, xfloat)
     #given an initial value, they should give the exact same answer
-    @test all(Optim.minimizer(resmes) .|> Measurements.value .== Optim.minimizer(resfloat))
-    @test Optim.minimum(resmes) .|> Measurements.value .== Optim.minimum(resfloat)
+    @test all(Optim_gf.minimizer(resmes) .|> Measurements.value .== Optim_gf.minimizer(resfloat))
+    @test Optim_gf.minimum(resmes) .|> Measurements.value .== Optim_gf.minimum(resfloat)
 
 end

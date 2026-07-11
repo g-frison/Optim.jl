@@ -6,7 +6,7 @@
 #        ldiv!(x, P, b) ->  x = P \ b
 #        dot(x, P, b)  ->  x' P b
 #
-#    If `dot` is not provided, then Optim.jl will try to define it via
+#    If `dot` is not provided, then Optim_gf.jl will try to define it via
 #        dot(x, P, b) = dot(x, mul!(similar(x), P, y))
 #
 #    finally the preconditioner can be updated after each x-update using

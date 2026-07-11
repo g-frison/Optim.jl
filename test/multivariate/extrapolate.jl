@@ -22,7 +22,7 @@ import LineSearches
     end
     rosenbrock(x) = (1.0 - x[1])^2 + 100.0 * (x[2] - x[1]^2)^2
     for (method, msg) in zip(methods, msgs)
-        results = Optim.optimize(rosenbrock, zeros(2), method)
+        results = Optim_gf.optimize(rosenbrock, zeros(2), method)
         debug_printing &&
             println(msg, "g_calls = ", results.g_calls, ", f_calls = ", results.f_calls)
     end
@@ -36,7 +36,7 @@ import LineSearches
     plap1(U; n = length(U), dU = diff(U), dW = 4 .* (0.1 .+ dU .^ 2) .* dU) =
         (n - 1) .* ([0.0; dW] .- [dW; 0.0]) .- ones(n) / (n - 1)
     precond(x::Vector) = precond(length(x))
-    precond(n::Number) = Optim.InverseDiagonal(
+    precond(n::Number) = Optim_gf.InverseDiagonal(
         diag(spdiagm(-1 => -ones(n - 1), 0 => 2 * ones(n), 1 => -ones(n - 1)) * (n + 1)),
     )
     f(X) = plap([0; X; 0])
@@ -55,13 +55,13 @@ import LineSearches
     ]
 
     for (method, msg) in zip(methods, msgs)
-        results = Optim.optimize(f, g!, copy(initial_x), method)
+        results = Optim_gf.optimize(f, g!, copy(initial_x), method)
         debug_printing && println(
             msg,
             "g_calls = ",
-            Optim.g_calls(results),
+            Optim_gf.g_calls(results),
             ", f_calls = ",
-            Optim.f_calls(results),
+            Optim_gf.f_calls(results),
         )
     end
 end

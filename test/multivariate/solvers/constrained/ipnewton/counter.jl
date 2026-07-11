@@ -47,10 +47,10 @@
         MVP.hessian(prob)(out, x)
     end
 
-    options = Optim.Options(; Optim.default_options(IPNewton())...)
+    options = Optim_gf.Options(; Optim_gf.default_options(IPNewton())...)
     # TODO: Run this on backtrack_constrained as well (when we figure out what it does)
-    for ls in [Optim.backtrack_constrained_grad]
-        #Optim.backtrack_constrained]
+    for ls in [Optim_gf.backtrack_constrained_grad]
+        #Optim_gf.backtrack_constrained]
 
         fcounter(true)
         gcounter(true)
@@ -63,9 +63,9 @@
         constraints = TwiceDifferentiableConstraints(-infvec, infvec)
 
         res = optimize(df, constraints, prob.initial_x, IPNewton(linesearch = ls), options)
-        @test fcount == Optim.f_calls(res)
-        @test gcount == Optim.g_calls(res)
-        @test hcount == Optim.h_calls(res)
+        @test fcount == Optim_gf.f_calls(res)
+        @test gcount == Optim_gf.g_calls(res)
+        @test hcount == Optim_gf.h_calls(res)
     end
 
     # TODO: Test a constrained problem

@@ -35,10 +35,10 @@
 
     d = OnceDifferentiable(f_gd_1, g_gd_1, initial_x)
 
-    results = Optim.optimize(d, initial_x, GradientDescent())
-    @test_throws ErrorException Optim.x_trace(results)
-    @test Optim.g_converged(results)
-    @test norm(Optim.minimizer(results) - [5.0]) < 0.01
+    results = Optim_gf.optimize(d, initial_x, GradientDescent())
+    @test_throws ErrorException Optim_gf.x_trace(results)
+    @test Optim_gf.g_converged(results)
+    @test norm(Optim_gf.minimizer(results) - [5.0]) < 0.01
     test_summary(results, "Gradient Descent")
 
     function f_gd_2(x)
@@ -54,12 +54,12 @@
 
     d = OnceDifferentiable(f_gd_2, g_gd_2, [1.0, 1.0])
 
-    results = Optim.optimize(d, [1.0, 1.0], GradientDescent())
-    @test_throws ErrorException Optim.x_trace(results)
-    @test Optim.g_converged(results)
-    @test norm(Optim.minimizer(results) - [0.0, 0.0]) < 0.01
+    results = Optim_gf.optimize(d, [1.0, 1.0], GradientDescent())
+    @test_throws ErrorException Optim_gf.x_trace(results)
+    @test Optim_gf.g_converged(results)
+    @test norm(Optim_gf.minimizer(results) - [0.0, 0.0]) < 0.01
 
-    reresults = optimize(d, Optim.minimizer(results), GradientDescent())
-    @test Optim.g_converged(reresults)
-    @test iszero(Optim.iterations(reresults)) # we expect immediate return given the initial guess
+    reresults = optimize(d, Optim_gf.minimizer(results), GradientDescent())
+    @test Optim_gf.g_converged(reresults)
+    @test iszero(Optim_gf.iterations(reresults)) # we expect immediate return given the initial guess
 end

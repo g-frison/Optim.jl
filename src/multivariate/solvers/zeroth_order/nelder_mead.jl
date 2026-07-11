@@ -60,7 +60,7 @@ and is used to generate parameters for the Nelder-Mead Algorithm
 ## Description
 Our current implementation of the Nelder-Mead algorithm is based on [1] and [3].
 Gradient-free methods can be a bit sensitive to starting values and tuning parameters,
-so it is a good idea to be careful with the defaults provided in Optim.jl.
+so it is a good idea to be careful with the defaults provided in Optim_gf.jl.
 
 Instead of using gradient information, Nelder-Mead is a direct search method. It keeps
 track of the function value at a number of points in the search space. Together, the

@@ -41,7 +41,7 @@
                 fill(zero(T), 2),
                 method,
             )
-            @test eltype(Optim.minimizer(result)) == T
+            @test eltype(Optim_gf.minimizer(result)) == T
         end
     end
 end

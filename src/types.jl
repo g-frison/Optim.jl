@@ -58,7 +58,7 @@ projection onto the box), which is the first-order stationarity measure under bo
 than against `‖g‖∞`. The two coincide only when no bound is active.
 
 For more information on individual options, see the documentation at
-<http://julianlsolvers.github.io/Optim.jl/stable/user/config>.
+<http://julianlsolvers.github.io/Optim_gf.jl/stable/user/config>.
 """
 struct Options{T, TCallback}
     x_abstol::T
@@ -199,7 +199,7 @@ _show_helper(output, k, v) = output * "$k = $v, "
 _show_helper(output, k, ::Nothing) = output
 
 function Base.show(io::IO, o::Options)
-    content = foldl(fieldnames(typeof(o)), init = "Optim.Options(") do output, k
+    content = foldl(fieldnames(typeof(o)), init = "Optim_gf.Options(") do output, k
         v = getfield(o, k)
         return _show_helper(output, k, v)
     end
@@ -237,7 +237,7 @@ end
 
 const OptimizationTrace{Tf,T} = Vector{OptimizationState{Tf,T}}
 
-"Termination codes for Optim.jl."
+"Termination codes for Optim_gf.jl."
 @enumx TerminationCode begin
     "Nelder-Mead simplex converged."
     NelderMeadCriterion

@@ -1,6 +1,6 @@
 @testset "Conjugate Gradient" begin
     # TODO: Investigate the exceptions (could be they just need more iterations?)
-    # Test Optim.cg for all differentiable functions in MultivariateProblems.UnconstrainedProblems.examples
+    # Test Optim_gf.cg for all differentiable functions in MultivariateProblems.UnconstrainedProblems.examples
     # Trigonometric gets stuck in a local minimum?
     skip = ("Trigonometric", "Extended Powell", "Rosenbrock")
     run_optim_tests(
@@ -25,14 +25,14 @@
 
         Random.seed!(1)
         B = rand(2, 2)
-        results = Optim.optimize(
+        results = Optim_gf.optimize(
             X -> cg_objective(X, B),
             (G, X) -> cg_objective_gradient!(G, X, B),
             rand(2, 2),
             ConjugateGradient(theta = theta),
         )
-        @test Optim.converged(results)
-        @test Optim.minimum(results) < 1e-8
+        @test Optim_gf.converged(results)
+        @test Optim_gf.minimum(results) < 1e-8
     end
 
     @testset "Undefined beta_k behaviour" begin
@@ -51,8 +51,8 @@
                 linesearch = LineSearches.BackTracking(),
             ),
         )
-        @test Optim.converged(res)
-        @test Optim.minimum(res) ≈ 1.0
+        @test Optim_gf.converged(res)
+        @test Optim_gf.minimum(res) ≈ 1.0
     end
 
     @testset "Access beta from callback" begin
@@ -98,9 +98,9 @@
                 linesearch = LineSearches.BackTracking(),
                 betamax = betamax,
             ),
-            Optim.Options(iterations = 3, callback = my_callback),
+            Optim_gf.Options(iterations = 3, callback = my_callback),
         )
-        @test Optim.minimizer(res)[1] ≈ x_global[1]
+        @test Optim_gf.minimizer(res)[1] ≈ x_global[1]
         @test check_beta
     end
 end

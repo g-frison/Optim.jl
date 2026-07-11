@@ -13,6 +13,6 @@ end
 
         a = MyCallable(rosenbrock)
 
-        optimize(a, rand(2), Optim.Options())
+        optimize(a, rand(2), Optim_gf.Options())
     end
 end

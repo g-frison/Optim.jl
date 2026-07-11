@@ -174,8 +174,8 @@ opt = optimize(func, ones(nvar + 1))
 
 ## Test the results                #src
 using Test                    #src
-@test Optim.converged(opt)         #src
-@test Optim.g_residual(opt) < 1e-8 #src
+@test Optim_gf.converged(opt)         #src
+@test Optim_gf.g_residual(opt) < 1e-8 #src
 
 
 # The first input to the command is the function we wish to optimize
@@ -188,7 +188,7 @@ using Test                    #src
 # The optimization routine stores several quantities and we can obtain
 # the maximum likelihood estimates with the following command:
 
-parameters = Optim.minimizer(opt)
+parameters = Optim_gf.minimizer(opt)
 @test parameters ≈ [2.83664, 3.05345, -0.98837] atol = 1e-5 #src
 
 #md # !!! note

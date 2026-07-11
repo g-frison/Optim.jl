@@ -101,9 +101,9 @@ multivariate_tests = [
 multivariate_tests = map(s -> "./multivariate/" * s * ".jl", multivariate_tests)
 
 input_tuple(method, prob) = ((MVP.objective(prob),),)
-input_tuple(method::Optim.FirstOrderOptimizer, prob) =
+input_tuple(method::Optim_gf.FirstOrderOptimizer, prob) =
     ((MVP.objective(prob),), (MVP.objective(prob), MVP.gradient(prob)))
-input_tuple(method::Optim.SecondOrderOptimizer, prob) = (
+input_tuple(method::Optim_gf.SecondOrderOptimizer, prob) = (
     (MVP.objective(prob),),
     (MVP.objective(prob), MVP.gradient(prob)),
     (MVP.objective(prob), MVP.gradient(prob), MVP.hessian(prob)),
@@ -153,14 +153,14 @@ function run_optim_tests(
         # If name wasn't found, use default 1000 iterations, else use provided number
         iters = length(iter_id) == 0 ? 1000 : iteration_exceptions[iter_id[1]][2]
         # Look for name in option_overrides: a tuple of (name, NamedTuple) pairs
-        # whose contents are splatted into Optim.Options for the matching problem.
+        # whose contents are splatted into Optim_gf.Options for the matching problem.
         override_id = findall(n -> n[1] == name, option_overrides)
         overrides =
             length(override_id) == 0 ? (;) : option_overrides[override_id[1]][2]
-        options = Optim.Options(;
+        options = Optim_gf.Options(;
             iterations = iters,
             show_trace = show_trace,
-            Optim.default_options(method)...,
+            Optim_gf.default_options(method)...,
             overrides...,
         )
 
@@ -173,25 +173,25 @@ function run_optim_tests(
                 end
 
                 # Loop over appropriate input combinations of f, g!, and h!
-                results = Optim.optimize(input..., prob.initial_x, method, options)
+                results = Optim_gf.optimize(input..., prob.initial_x, method, options)
                 test_summary(results)
                 show_res && println(results)
                 show_itcalls &&
-                    printstyled("Iterations: ", Optim.iterations(results), "\n"; color = :red)
+                    printstyled("Iterations: ", Optim_gf.iterations(results), "\n"; color = :red)
                 show_itcalls &&
-                    printstyled("f-calls: ", Optim.f_calls(results), "\n"; color = :red)
+                    printstyled("f-calls: ", Optim_gf.f_calls(results), "\n"; color = :red)
                 show_itcalls &&
-                    printstyled("g-calls: ", Optim.g_calls(results), "\n"; color = :red)
+                    printstyled("g-calls: ", Optim_gf.g_calls(results), "\n"; color = :red)
                 show_itcalls &&
-                    printstyled("jvp-calls: ", Optim.jvp_calls(results), "\n"; color = :red)
+                    printstyled("jvp-calls: ", Optim_gf.jvp_calls(results), "\n"; color = :red)
                 show_itcalls &&
-                    printstyled("h-calls: ", Optim.h_calls(results), "\n"; color = :red)
+                    printstyled("h-calls: ", Optim_gf.h_calls(results), "\n"; color = :red)
                 show_itcalls &&
-                    printstyled("hvp-calls: ", Optim.hvp_calls(results), "\n"; color = :red)
+                    printstyled("hvp-calls: ", Optim_gf.hvp_calls(results), "\n"; color = :red)
                 if !((name, i) in convergence_exceptions)
-                    @test Optim.converged(results)
+                    @test Optim_gf.converged(results)
                     # Print on error, easier to debug CI
-                    if !(Optim.converged(results))
+                    if !(Optim_gf.converged(results))
                         printstyled(
                             name,
                             " did not converge with i = ",
@@ -202,19 +202,19 @@ function run_optim_tests(
                         printstyled(results, "\n", color = :red)
                     end
                 elseif test_broken
-                    @test_broken Optim.converged(results)
+                    @test_broken Optim_gf.converged(results)
                 end
                 if !((name, i) in minimum_exceptions)
-                    @test Optim.minimum(results) <
+                    @test Optim_gf.minimum(results) <
                           prob.minimum + sqrt(eps(typeof(prob.minimum)))
                 elseif test_broken
-                    @test_broken Optim.minimum(results) <
+                    @test_broken Optim_gf.minimum(results) <
                                  prob.minimum + sqrt(eps(typeof(prob.minimum)))
                 end
                 if !((name, i) in minimizer_exceptions)
-                    @test norm(Optim.minimizer(results) - prob.solutions) < 1e-2
+                    @test norm(Optim_gf.minimizer(results) - prob.solutions) < 1e-2
                 elseif test_broken
-                    @test_broken norm(Optim.minimizer(results) - prob.solutions) < 1e-2
+                    @test_broken norm(Optim_gf.minimizer(results) - prob.solutions) < 1e-2
                 end
             end
         else
@@ -250,8 +250,8 @@ function run_optim_tests_constrained(
         # If name wasn't found, use default 1000 iterations, else use provided number
         iters = length(iter_id) == 0 ? 1000 : iteration_exceptions[iter_id[1]][2]
         # Construct options
-        options = Optim.Options(;
-            Optim.default_options(method)...,
+        options = Optim_gf.Options(;
+            Optim_gf.default_options(method)...,
             iterations = iters,
             show_trace = show_trace,
         )
@@ -272,38 +272,38 @@ function run_optim_tests_constrained(
             test_summary(results)
             show_res && println(results)
             show_itcalls &&
-                printstyled("Iterations: ", Optim.iterations(results), "\n"; color = :red)
+                printstyled("Iterations: ", Optim_gf.iterations(results), "\n"; color = :red)
             show_itcalls &&
-                printstyled("f-calls: ", Optim.f_calls(results), "\n"; color = :red)
+                printstyled("f-calls: ", Optim_gf.f_calls(results), "\n"; color = :red)
             show_itcalls &&
-                printstyled("g-calls: ", Optim.g_calls(results), "\n"; color = :red)
+                printstyled("g-calls: ", Optim_gf.g_calls(results), "\n"; color = :red)
             show_itcalls &&
-                printstyled("jvp-calls: ", Optim.jvp_calls(results), "\n"; color = :red)
+                printstyled("jvp-calls: ", Optim_gf.jvp_calls(results), "\n"; color = :red)
             show_itcalls &&
-                printstyled("h-calls: ", Optim.h_calls(results), "\n"; color = :red)
+                printstyled("h-calls: ", Optim_gf.h_calls(results), "\n"; color = :red)
             show_itcalls &&
-                printstyled("hvp-calls: ", Optim.hvp_calls(results), "\n"; color = :red)
+                printstyled("hvp-calls: ", Optim_gf.hvp_calls(results), "\n"; color = :red)
             if !(name in convergence_exceptions)
-                @test Optim.converged(results)
+                @test Optim_gf.converged(results)
                 # Print on error
-                if !(Optim.converged(results))
+                if !(Optim_gf.converged(results))
                     printstyled(name, "did not converge\n", color = :red)
                     printstyled(results, "\n", color = :red)
                 end
             elseif test_broken
-                @test_broken Optim.converged(results)
+                @test_broken Optim_gf.converged(results)
             end
             if !(name in minimum_exceptions)
-                @test Optim.minimum(results) <
+                @test Optim_gf.minimum(results) <
                       prob.minimum + sqrt(eps(typeof(prob.minimum)))
             elseif test_broken
-                @test_broken Optim.minimum(results) <
+                @test_broken Optim_gf.minimum(results) <
                              prob.minimum + sqrt(eps(typeof(prob.minimum)))
             end
             if !(name in minimizer_exceptions)
-                @test norm(Optim.minimizer(results) - prob.solutions) < 1e-2
+                @test norm(Optim_gf.minimizer(results) - prob.solutions) < 1e-2
             elseif test_broken
-                @test_broken norm(Optim.minimizer(results) - prob.solutions) < 1e-2
+                @test_broken norm(Optim_gf.minimizer(results) - prob.solutions) < 1e-2
             end
         else
             @test_broken false
@@ -312,7 +312,7 @@ function run_optim_tests_constrained(
     end
 end
 
-@testset verbose = true "Optim.jl" begin
+@testset verbose = true "Optim_gf.jl" begin
     @testset "special" begin
         @testset for my_test in special_tests
             println(my_test)
@@ -342,7 +342,7 @@ end
     @time include("examples.jl")
 
     @testset "show method for options" begin
-        o = Optim.Options()
+        o = Optim_gf.Options()
         @test occursin(" = ", sprint(show, o))
     end
 

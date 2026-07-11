@@ -1,7 +1,7 @@
 module OptimMOIExt
 
 using Optim
-using Optim.LinearAlgebra: rmul!
+using Optim_gf.LinearAlgebra: rmul!
 import MathOptInterface as MOI
 
 function __init__()
@@ -16,12 +16,12 @@ mutable struct Optimizer{T} <: MOI.AbstractOptimizer
     sense::MOI.OptimizationSense
 
     # Parameters.
-    method::Union{Optim.AbstractOptimizer,Nothing}
+    method::Union{Optim_gf.AbstractOptimizer,Nothing}
     silent::Bool
     options::Dict{Symbol,Any}
 
     # Solution attributes.
-    results::Union{Nothing,Optim.MultivariateOptimizationResults}
+    results::Union{Nothing,Optim_gf.MultivariateOptimizationResults}
 end
 
 function Optimizer{T}() where {T}
@@ -59,7 +59,7 @@ end
 
 MOI.supports(::Optimizer, ::MOI.Silent) = true
 function MOI.supports(::Optimizer, p::MOI.RawOptimizerAttribute)
-    return p.name == "method" || hasfield(Optim.Options, Symbol(p.name))
+    return p.name == "method" || hasfield(Optim_gf.Options, Symbol(p.name))
 end
 
 function MOI.supports(::Optimizer, ::MOI.VariablePrimalStart, ::Type{MOI.VariableIndex})
@@ -126,7 +126,7 @@ function MOI.get(model::Optimizer, ::MOI.TimeLimitSec)
     return get(model.options, Symbol(TIME_LIMIT), nothing)
 end
 
-MOI.Utilities.map_indices(::Function, opt::Optim.AbstractOptimizer) = opt
+MOI.Utilities.map_indices(::Function, opt::Optim_gf.AbstractOptimizer) = opt
 
 function MOI.set(model::Optimizer, p::MOI.RawOptimizerAttribute, value)
     if p.name == "method"
@@ -148,7 +148,7 @@ function MOI.get(model::Optimizer, p::MOI.RawOptimizerAttribute)
     error("RawOptimizerAttribute with name $(p.name) is not set.")
 end
 
-MOI.get(model::Optimizer, ::MOI.SolveTimeSec) = Optim.time_run(model.results)
+MOI.get(model::Optimizer, ::MOI.SolveTimeSec) = Optim_gf.time_run(model.results)
 
 function MOI.empty!(model::Optimizer)
     MOI.empty!(model.variables)
@@ -235,17 +235,17 @@ function MOI.set(
     return
 end
 
-function requested_features(::Optim.ZerothOrderOptimizer, has_constraints)
+function requested_features(::Optim_gf.ZerothOrderOptimizer, has_constraints)
     return Symbol[]
 end
-function requested_features(::Optim.FirstOrderOptimizer, has_constraints)
+function requested_features(::Optim_gf.FirstOrderOptimizer, has_constraints)
     features = [:Grad]
     if has_constraints
         push!(features, :Jac)
     end
     return features
 end
-function requested_features(::Union{IPNewton,Optim.SecondOrderOptimizer}, has_constraints)
+function requested_features(::Union{IPNewton,Optim_gf.SecondOrderOptimizer}, has_constraints)
     features = [:Grad, :Hess]
     if has_constraints
         push!(features, :Jac)
@@ -318,12 +318,12 @@ function MOI.optimize!(model::Optimizer{T}) where {T}
             # are variable bounds, `Newton` is not supported. On the other hand,
             # `fallback_method(f, g!)` returns `LBFGS` which is supported if `has_bounds`.
             if :Hess in features && !has_bounds
-                method = Optim.fallback_method(f, g!, h!)
+                method = Optim_gf.fallback_method(f, g!, h!)
             else
-                method = Optim.fallback_method(f, g!)
+                method = Optim_gf.fallback_method(f, g!)
             end
         else
-            method = Optim.fallback_method(f)
+            method = Optim_gf.fallback_method(f)
         end
     end
     used_features = requested_features(method, nl_constrained)
@@ -337,7 +337,7 @@ function MOI.optimize!(model::Optimizer{T}) where {T}
     initial_x = starting_value.(model, eachindex(model.starting_values))
     options = copy(model.options)
     if !nl_constrained && has_bounds && !(method isa IPNewton)
-        options = Optim.Options(; options...)
+        options = Optim_gf.Options(; options...)
         model.results = optimize(
             f,
             g!,
@@ -349,8 +349,8 @@ function MOI.optimize!(model::Optimizer{T}) where {T}
             inplace = true,
         )
     else
-        d = Optim.promote_objtype(method, initial_x, Optim.DEFAULT_AD_TYPE, true, f, g!, h!)
-        options = Optim.Options(; Optim.default_options(method)..., options...)
+        d = Optim_gf.promote_objtype(method, initial_x, Optim_gf.DEFAULT_AD_TYPE, true, f, g!, h!)
+        options = Optim_gf.Options(; Optim_gf.default_options(method)..., options...)
         if nl_constrained || has_bounds
             if nl_constrained
                 lc = [b.lower for b in nlp_data.constraint_bounds]
@@ -358,12 +358,12 @@ function MOI.optimize!(model::Optimizer{T}) where {T}
                 c!(c, x) = MOI.eval_constraint(evaluator, c, x)
                 if !(:Jac in features)
                     error(
-                        "Nonlinear constraints should be differentiable to be used with Optim.",
+                        "Nonlinear constraints should be differentiable to be used with Optim_gf.",
                     )
                 end
                 if !(:Hess in features)
                     error(
-                        "Nonlinear constraints should be twice differentiable to be used with Optim.",
+                        "Nonlinear constraints should be twice differentiable to be used with Optim_gf.",
                     )
                 end
                 jacobian_structure = MOI.jacobian_structure(evaluator)
@@ -407,7 +407,7 @@ end
 function MOI.get(model::Optimizer, ::MOI.TerminationStatus)
     if model.results === nothing
         return MOI.OPTIMIZE_NOT_CALLED
-    elseif Optim.converged(model.results)
+    elseif Optim_gf.converged(model.results)
         return MOI.LOCALLY_SOLVED
     else
         return MOI.OTHER_ERROR
@@ -427,7 +427,7 @@ function MOI.get(model::Optimizer, attr::MOI.PrimalStatus)
     if !(1 <= attr.result_index <= MOI.get(model, MOI.ResultCount()))
         return MOI.NO_SOLUTION
     end
-    if Optim.converged(model.results)
+    if Optim_gf.converged(model.results)
         return MOI.FEASIBLE_POINT
     else
         return MOI.UNKNOWN_RESULT_STATUS
@@ -437,7 +437,7 @@ MOI.get(::Optimizer, ::MOI.DualStatus) = MOI.NO_SOLUTION
 
 function MOI.get(model::Optimizer, attr::MOI.ObjectiveValue)
     MOI.check_result_index_bounds(model, attr)
-    val = Optim.minimum(model.results)
+    val = Optim_gf.minimum(model.results)
     if model.sense == MOI.MAX_SENSE
         val = -val
     end
@@ -447,7 +447,7 @@ end
 function MOI.get(model::Optimizer, attr::MOI.VariablePrimal, vi::MOI.VariableIndex)
     MOI.check_result_index_bounds(model, attr)
     MOI.throw_if_not_valid(model, vi)
-    return Optim.minimizer(model.results)[vi.value]
+    return Optim_gf.minimizer(model.results)[vi.value]
 end
 
 function MOI.get(
@@ -457,6 +457,6 @@ function MOI.get(
 ) where {T}
     MOI.check_result_index_bounds(model, attr)
     MOI.throw_if_not_valid(model, ci)
-    return Optim.minimizer(model.results)[ci.value]
+    return Optim_gf.minimizer(model.results)[ci.value]
 end
 end # module

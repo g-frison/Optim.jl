@@ -35,9 +35,9 @@ end
         )
             debug_printing && printstyled("Solver: " * string(m); color = :green)
             res = optimize(f, g!, [1.0, 0.0, 1.0, 0.0], m())
-            @test typeof(Optim.minimizer(res)) <: Vector
+            @test typeof(Optim_gf.minimizer(res)) <: Vector
             if !(m in (NelderMead, SimulatedAnnealing, ParticleSwarm))
-                @test norm(Optim.minimizer(res) - [10.0, 0.0, 0.0, 5.0]) < 10e-8
+                @test norm(Optim_gf.minimizer(res) - [10.0, 0.0, 0.0, 5.0]) < 10e-8
             end
         end
     end
@@ -57,9 +57,9 @@ end
             OACCEL,
         )
             res = optimize(f, g!, Matrix{Float64}(I, 2, 2), m())
-            @test typeof(Optim.minimizer(res)) <: Matrix
+            @test typeof(Optim_gf.minimizer(res)) <: Matrix
             if !(m in (SimulatedAnnealing, ParticleSwarm))
-                @test norm(Optim.minimizer(res) - [10.0 0.0; 0.0 5.0]) < 10e-8
+                @test norm(Optim_gf.minimizer(res) - [10.0 0.0; 0.0 5.0]) < 10e-8
             end
         end
     end
@@ -81,7 +81,7 @@ end
             OACCEL,
         )
             res = optimize(f, g!, eye3, m())
-            _minimizer = Optim.minimizer(res)
+            _minimizer = Optim_gf.minimizer(res)
             @test typeof(_minimizer) <: Array{Float64,3}
             @test size(_minimizer) == (2, 2, 1)
             if !(m in (SimulatedAnnealing, ParticleSwarm))

@@ -1,6 +1,6 @@
 @testset "Finite difference timing" begin
-    fd_input_tuple(method::Optim.FirstOrderOptimizer, prob) = ((MVP.objective(prob),),)
-    fd_input_tuple(method::Optim.SecondOrderOptimizer, prob) =
+    fd_input_tuple(method::Optim_gf.FirstOrderOptimizer, prob) = ((MVP.objective(prob),),)
+    fd_input_tuple(method::Optim_gf.SecondOrderOptimizer, prob) =
         ((MVP.objective(prob),), (MVP.objective(prob), MVP.gradient(prob)))
 
     function run_optim_fd_tests(
@@ -21,21 +21,21 @@
         for name in problems
             prob = MVP.UnconstrainedProblems.examples[name]
             show_name && printstyled("Problem: ", name, "\n", color = :green)
-            options = Optim.Options(allow_f_increases = true, show_trace = show_trace)
+            options = Optim_gf.Options(allow_f_increases = true, show_trace = show_trace)
             for (i, input) in enumerate(fd_input_tuple(method, prob))
                 # Loop over appropriate input combinations of f, g!, and h!
-                results = Optim.optimize(input..., prob.initial_x, method, options)
+                results = Optim_gf.optimize(input..., prob.initial_x, method, options)
 
                 debug_printing &&
-                    printstyled("f-calls: $(Optim.f_calls(results))\n", color = :red)
+                    printstyled("f-calls: $(Optim_gf.f_calls(results))\n", color = :red)
                 show_res && display(results)
 
-                show_time && @time Optim.optimize(input..., prob.initial_x, method, options)
+                show_time && @time Optim_gf.optimize(input..., prob.initial_x, method, options)
 
-                @test Optim.converged(results)
-                @test Optim.minimum(results) <
+                @test Optim_gf.converged(results)
+                @test Optim_gf.minimum(results) <
                       prob.minimum + sqrt(eps(typeof(prob.minimum)))
-                @test norm(Optim.minimizer(results) - prob.solutions) < 1e-2
+                @test norm(Optim_gf.minimizer(results) - prob.solutions) < 1e-2
             end
         end
     end

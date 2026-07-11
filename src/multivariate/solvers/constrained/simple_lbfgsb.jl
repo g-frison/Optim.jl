@@ -5,7 +5,7 @@
 # Same algorithm as `LBFGSB` (generalized Cauchy point + subspace minimization
 # on B = θI - W M Wᵀ), but written for clarity rather than speed: dense Gram
 # rebuilds and an explicit `inv` instead of Cholesky factors, and fresh
-# allocations instead of in-place workspace. Run it with `Optim.SimpleLBFGSB()`.
+# allocations instead of in-place workspace. Run it with `Optim_gf.SimpleLBFGSB()`.
 
 module SimpleLBFGSBReference
 
@@ -19,7 +19,7 @@ abstract type LineSearcher end
 include("lbfgsb/hz.jl")
 include("lbfgsb/linesearches_mt.jl")
 
-struct SimpleLBFGSB{L<:LineSearcher,T} <: Optim.AbstractConstrainedOptimizer
+struct SimpleLBFGSB{L<:LineSearcher,T} <: Optim_gf.AbstractConstrainedOptimizer
     m::Int
     linesearch::L
     stepsize::T
@@ -27,16 +27,16 @@ struct SimpleLBFGSB{L<:LineSearcher,T} <: Optim.AbstractConstrainedOptimizer
 end
 
 #=
-    Optim.SimpleLBFGSB(; m=10, linesearch=HZAW(), stepsize=1.0, clip_subspace=true)
+    Optim_gf.SimpleLBFGSB(; m=10, linesearch=HZAW(), stepsize=1.0, clip_subspace=true)
 
 Reference implementation of L-BFGS-B, kept internal and **not exported**. It
-solves the same bound-constrained problem as `Optim.LBFGSB` with the same
+solves the same bound-constrained problem as `Optim_gf.LBFGSB` with the same
 options and keywords, but uses dense matrix rebuilds and an explicit inverse
 instead of the Cholesky-factored, incremental, in-place machinery of `LBFGSB`.
 It is a fully independent implementation, kept only for cross-checking the
 efficient solver, and is not intended for production use. Run it with
-`Optim.SimpleLBFGSB()`. Its line search keyword accepts
-`Optim.SimpleLBFGSBReference.HZAW()` / `...MTLS()`.
+`Optim_gf.SimpleLBFGSB()`. Its line search keyword accepts
+`Optim_gf.SimpleLBFGSBReference.HZAW()` / `...MTLS()`.
 =#
 function SimpleLBFGSB(;
     m::Integer = 10,
@@ -51,7 +51,7 @@ Base.summary(io::IO, ::SimpleLBFGSB) = print(io, "L-BFGS-B (simple reference)")
 
 # Own optimizer state for the termination code. Subtypes AbstractOptimizerState
 # (not ZerothOrderState) so the generic change accessors return real values.
-struct SimpleState{Tx,Tf,Tfp} <: Optim.AbstractOptimizerState
+struct SimpleState{Tx,Tf,Tfp} <: Optim_gf.AbstractOptimizerState
     x::Tx
     f_x::Tf
     x_previous::Tx
@@ -327,7 +327,7 @@ function trace!(tr, iteration, f_x, pgnorm, x, g, options, curr_time)
         dt["x"] = copy(x)
         dt["g(x)"] = copy(g)
     end
-    Optim.update!(
+    Optim_gf.update!(
         tr,
         iteration,
         f_x,
@@ -339,45 +339,45 @@ function trace!(tr, iteration, f_x, pgnorm, x, g, options, curr_time)
     )
 end
 
-function Optim.optimize(
+function Optim_gf.optimize(
     f,
     l::AbstractArray,
     u::AbstractArray,
     x0::AbstractArray,
     method::SimpleLBFGSB,
-    options::Optim.Options = Optim.Options();
+    options::Optim_gf.Options = Optim_gf.Options();
     inplace::Bool = true,
-    autodiff::ADTypes.AbstractADType = Optim.DEFAULT_AD_TYPE,
+    autodiff::ADTypes.AbstractADType = Optim_gf.DEFAULT_AD_TYPE,
 )
     if f isa NonDifferentiable
         f = f.f
     end
     od = OnceDifferentiable(f, x0, zero(eltype(x0)); inplace, autodiff)
-    Optim.optimize(od, l, u, x0, method, options)
+    Optim_gf.optimize(od, l, u, x0, method, options)
 end
 
-function Optim.optimize(
+function Optim_gf.optimize(
     f,
     g,
     l::AbstractArray,
     u::AbstractArray,
     x0::AbstractArray,
     method::SimpleLBFGSB,
-    options::Optim.Options = Optim.Options();
+    options::Optim_gf.Options = Optim_gf.Options();
     inplace::Bool = true,
 )
     g! = inplace ? g : (G, x) -> copyto!(G, g(x))
     od = OnceDifferentiable(f, g!, x0, zero(eltype(x0)))
-    Optim.optimize(od, l, u, x0, method, options)
+    Optim_gf.optimize(od, l, u, x0, method, options)
 end
 
-function Optim.optimize(
+function Optim_gf.optimize(
     d::OnceDifferentiable,
     l::AbstractArray,
     u::AbstractArray,
     x0::AbstractArray,
     method::SimpleLBFGSB,
-    options::Optim.Options = Optim.Options(),
+    options::Optim_gf.Options = Optim_gf.Options(),
 )
     T = eltype(x0)
     t0 = time()
@@ -397,9 +397,9 @@ function Optim.optimize(
 
     B = CompactLBFGS{T}(n, method.m)
 
-    tr = Optim.OptimizationTrace{typeof(f_x),typeof(method)}()
+    tr = Optim_gf.OptimizationTrace{typeof(f_x),typeof(method)}()
     tracing = options.store_trace || options.show_trace || options.extended_trace
-    options.show_trace && Optim.print_header(method)
+    options.show_trace && Optim_gf.print_header(method)
 
     x_previous = copy(x)
     f_x_previous = oftype(f_x, NaN)
@@ -483,11 +483,11 @@ function Optim.optimize(
         pgnorm = pg_norm(x, g, l, u)
 
         x_converged =
-            Optim.x_abschange(x, x_previous) <= options.x_abstol ||
-            Optim.x_relchange(x, x_previous) <= options.x_reltol
+            Optim_gf.x_abschange(x, x_previous) <= options.x_abstol ||
+            Optim_gf.x_relchange(x, x_previous) <= options.x_reltol
         f_converged =
-            Optim.f_abschange(f_x, f_x_previous) <= options.f_abstol ||
-            Optim.f_relchange(f_x, f_x_previous) <= options.f_reltol
+            Optim_gf.f_abschange(f_x, f_x_previous) <= options.f_abstol ||
+            Optim_gf.f_relchange(f_x, f_x_previous) <= options.f_reltol
         g_converged = pgnorm <= options.g_abstol
         f_increased = f_x > f_x_previous
         converged = x_converged || f_converged || g_converged
@@ -534,7 +534,7 @@ function Optim.optimize(
         small_trustregion_radius = false,
     )
 
-    termination_code = Optim._termination_code(
+    termination_code = Optim_gf._termination_code(
         d,
         pgnorm,
         SimpleState(x, f_x, x_previous, f_x_previous),
@@ -542,7 +542,7 @@ function Optim.optimize(
         options,
     )
 
-    return Optim.MultivariateOptimizationResults(
+    return Optim_gf.MultivariateOptimizationResults(
         method,
         x0,
         f_incr_pick ? x_previous : x,
@@ -550,12 +550,12 @@ function Optim.optimize(
         iteration,
         Tf(options.x_abstol),
         Tf(options.x_reltol),
-        Optim.x_abschange(x, x_previous),
-        Optim.x_relchange(x, x_previous),
+        Optim_gf.x_abschange(x, x_previous),
+        Optim_gf.x_relchange(x, x_previous),
         Tf(options.f_abstol),
         Tf(options.f_reltol),
-        Optim.f_abschange(f_x, f_x_previous),
-        Optim.f_relchange(f_x, f_x_previous),
+        Optim_gf.f_abschange(f_x, f_x_previous),
+        Optim_gf.f_relchange(f_x, f_x_previous),
         Tf(options.g_abstol),
         pgnorm,
         tr,

@@ -25,10 +25,10 @@ using Optim, Test
     @test solver.nlpreconopts.iterations == 1
     @test solver.nlpreconopts.allow_f_increases
 
-    defopts = Optim.default_options(solver)
+    defopts = Optim_gf.default_options(solver)
     @test defopts == (; allow_f_increases = true)
 
-    state = Optim.initial_state(solver, Optim.Options(; defopts...), df, prob.initial_x)
+    state = Optim_gf.initial_state(solver, Optim_gf.Options(; defopts...), df, prob.initial_x)
     @test state.x === state.nlpreconstate.x
     @test state.x_previous === state.nlpreconstate.x_previous
     @test size(state.X) == (length(state.x), solver.wmax)
@@ -45,19 +45,19 @@ using Optim, Test
         df,
         prob.initial_x,
         solver,
-        Optim.Options(extended_trace = true, store_trace = true; defopts..., iterations = 10^5),
+        Optim_gf.Options(extended_trace = true, store_trace = true; defopts..., iterations = 10^5),
     )
 
-    @test Optim.converged(res)
+    @test Optim_gf.converged(res)
     # The bounds are due to different systems behaving differently
     # TODO: is it a bad idea to hardcode these?
-    @test_broken 64 < Optim.iterations(res) < 100
-    @test_broken 234 <= Optim.f_calls(res) < 310
-    @test_broken 234 <= Optim.g_calls(res) < 310
-    @test Optim.minimum(res) < 1e-10
+    @test_broken 64 < Optim_gf.iterations(res) < 100
+    @test_broken 234 <= Optim_gf.f_calls(res) < 310
+    @test_broken 234 <= Optim_gf.g_calls(res) < 310
+    @test Optim_gf.minimum(res) < 1e-10
 
     @test_throws AssertionError method(
-        manifold = Optim.Sphere(),
+        manifold = Optim_gf.Sphere(),
         nlprecon = GradientDescent(),
     )
 
@@ -66,11 +66,11 @@ using Optim, Test
         clear!(df)
         res = optimize(df, prob.initial_x, solver)
 
-        if !Optim.converged(res)
+        if !Optim_gf.converged(res)
             display(res)
         end
-        @test Optim.converged(res)
-        @test Optim.minimum(res) < 1e-10
+        @test Optim_gf.converged(res)
+        @test Optim_gf.minimum(res) < 1e-10
     end
 
     # O-ACCEL handles the InitialConstantChange functionality in a special way,
@@ -85,11 +85,11 @@ using Optim, Test
 
         res = optimize(df, prob.initial_x, solver)
 
-        if !Optim.converged(res)
+        if !Optim_gf.converged(res)
             display(res)
         end
-        @test Optim.converged(res)
-        @test Optim.minimum(res) < 1e-10
+        @test Optim_gf.converged(res)
+        @test Optim_gf.minimum(res) < 1e-10
     end
 end
 
@@ -111,10 +111,10 @@ end
     @test solver.nlpreconopts.iterations == 1
     @test solver.nlpreconopts.allow_f_increases
 
-    defopts = Optim.default_options(solver)
+    defopts = Optim_gf.default_options(solver)
     @test defopts == (; allow_f_increases = true)
 
-    state = Optim.initial_state(solver, Optim.Options(; defopts...), df, prob.initial_x)
+    state = Optim_gf.initial_state(solver, Optim_gf.Options(; defopts...), df, prob.initial_x)
     @test state.x === state.nlpreconstate.x
     @test state.x_previous === state.nlpreconstate.x_previous
     @test size(state.X) == (length(state.x), solver.wmax)
@@ -131,19 +131,19 @@ end
         df,
         prob.initial_x,
         solver,
-        Optim.Options(extended_trace = true, store_trace = true; defopts...),
+        Optim_gf.Options(extended_trace = true, store_trace = true; defopts...),
     )
-    @test Optim.converged(res)
+    @test Optim_gf.converged(res)
     # The bounds are due to different systems behaving differently
     # TODO: is it a bad idea to hardcode these?
-    @test 72 < Optim.iterations(res) < 100
-    @test 245 < Optim.f_calls(res) < 310
-    @test 245 < Optim.g_calls(res) < 310
+    @test 72 < Optim_gf.iterations(res) < 100
+    @test 245 < Optim_gf.f_calls(res) < 310
+    @test 245 < Optim_gf.g_calls(res) < 310
 
-    @test Optim.minimum(res) < 1e-10
+    @test Optim_gf.minimum(res) < 1e-10
 
     @test_throws AssertionError method(
-        manifold = Optim.Sphere(),
+        manifold = Optim_gf.Sphere(),
         nlprecon = GradientDescent(),
     )
 
@@ -152,11 +152,11 @@ end
         clear!(df)
         res = optimize(df, prob.initial_x, solver)
 
-        if !Optim.converged(res)
+        if !Optim_gf.converged(res)
             display(res)
         end
-        @test Optim.converged(res)
-        @test Optim.minimum(res) < 1e-10
+        @test Optim_gf.converged(res)
+        @test Optim_gf.minimum(res) < 1e-10
     end
 
     # O-ACCEL handles the InitialConstantChange functionality in a special way,
@@ -171,10 +171,10 @@ end
 
         res = optimize(df, prob.initial_x, solver)
 
-        if !Optim.converged(res)
+        if !Optim_gf.converged(res)
             display(res)
         end
-        @test Optim.converged(res)
-        @test Optim.minimum(res) < 1e-10
+        @test Optim_gf.converged(res)
+        @test Optim_gf.minimum(res) < 1e-10
     end
 end

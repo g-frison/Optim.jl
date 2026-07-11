@@ -36,10 +36,10 @@
                 initial_x,
             )
             results = optimize(_objective, initial_x, ConjugateGradient())
-            @test Optim.converged(results)
-            results = optimize(_objective, Optim.minimizer(results), ConjugateGradient())  # restart to ensure high-precision convergence
-            @test Optim.converged(results)
-            opt_x = Optim.minimizer(results)
+            @test Optim_gf.converged(results)
+            results = optimize(_objective, Optim_gf.minimizer(results), ConjugateGradient())  # restart to ensure high-precision convergence
+            @test Optim_gf.converged(results)
+            opt_x = Optim_gf.minimizer(results)
             @test norm(g) < 1e-4
             if any(t -> abs(t) > boxl, opt_x)
                 return _objective
@@ -55,9 +55,9 @@
     for _optimizer in (ConjugateGradient(), GradientDescent(), LBFGS(), BFGS())
         debug_printing && printstyled("Solver: ", summary(_optimizer), "\n", color = :green)
         results = optimize(_objective, l, u, initial_x, Fminbox(_optimizer))
-        @test Optim.converged(results)
+        @test Optim_gf.converged(results)
         test_summary(results, "Fminbox with $(summary(_optimizer))")
-        opt_x = Optim.minimizer(results)
+        opt_x = Optim_gf.minimizer(results)
         NLSolversBase.gradient!(_objective, opt_x)
         g = NLSolversBase.gradient(_objective)
         # check first-order constrained optimality conditions
@@ -78,10 +78,10 @@
         u,
         initial_x,
         Fminbox(),
-        Optim.Options(outer_iterations = 2),
+        Optim_gf.Options(outer_iterations = 2),
     )
-    @test Optim.iterations(results) == 2
-    @test Optim.minimum(results) == _objective.f(Optim.minimizer(results))
+    @test Optim_gf.iterations(results) == 2
+    @test Optim_gf.minimum(results) == _objective.f(Optim_gf.minimizer(results))
 
 
     # Warn when initial condition is not in the interior of the box
@@ -89,12 +89,12 @@
     @test_logs (
         :warn,
         "Initial position cannot be on the boundary of the box. Moving elements to the interior.\nElement indices affected: [1, 2, 3, 4, 5, 6, 7, 8]",
-    ) optimize(_objective, l, u, initial_x, Fminbox(), Optim.Options(outer_iterations = 1))
+    ) optimize(_objective, l, u, initial_x, Fminbox(), Optim_gf.Options(outer_iterations = 1))
 
-    # might fail if changes are made to Optim.jl
+    # might fail if changes are made to Optim_gf.jl
     # TODO: come up with a better test
-    #results = Optim.optimize(_objective, initial_x, l, u, Fminbox(); optimizer_o = Optim.Options(iterations = 2))
-    #@test Optim.iterations(results) == 470
+    #results = Optim_gf.optimize(_objective, initial_x, l, u, Fminbox(); optimizer_o = Optim_gf.Options(iterations = 2))
+    #@test Optim_gf.iterations(results) == 470
     @testset "simple input" begin
         function exponential(x)
             return exp((2.0 - x[1])^2) + exp((3.0 - x[2])^2)
@@ -161,8 +161,8 @@
                 Fminbox(NewtonTrustRegion()),
             )
         end
-        @testset "allow for an Optim.Options to be passed #623" begin
-            optimize(exponential, lb, ub, initial_x, Fminbox(), Optim.Options())
+        @testset "allow for an Optim_gf.Options to be passed #623" begin
+            optimize(exponential, lb, ub, initial_x, Fminbox(), Optim_gf.Options())
             optimize(
                 exponential,
                 exponential_gradient!,
@@ -170,7 +170,7 @@
                 ub,
                 initial_x,
                 Fminbox(),
-                Optim.Options(),
+                Optim_gf.Options(),
             )
             @test_broken optimize(
                 exponential,
@@ -178,34 +178,34 @@
                 lb,
                 ub,
                 initial_x,
-                Optim.Options(),
+                Optim_gf.Options(),
             )
         end
         @testset "Guard against gbarrier_norm == 0 in computation of initial mu #1233" begin
             l_inf, u_inf = fill(-Inf, 2), fill(Inf, 2)
         
             # gnorm > 0, gbarrier_norm == 0: previously mu = gnorm/0 = Inf
-            res = optimize(exponential, l_inf, u_inf, initial_x, Fminbox(), Optim.Options())
-            @test Optim.converged(res)
-            @test Optim.minimizer(res) ≈ [2.0, 3.0] atol = 1e-3
+            res = optimize(exponential, l_inf, u_inf, initial_x, Fminbox(), Optim_gf.Options())
+            @test Optim_gf.converged(res)
+            @test Optim_gf.minimizer(res) ≈ [2.0, 3.0] atol = 1e-3
                                 
             # gnorm == 0 and gbarrier_norm == 0: previously mu = 0/0 = NaN
             # ([2.0, 3.0] is the stationary point of `exponential`)
-            res = optimize(exponential, l_inf, u_inf, [2.0, 3.0], Fminbox(), Optim.Options())
-            @test Optim.converged(res)
-            @test Optim.minimizer(res) ≈ [2.0, 3.0]
+            res = optimize(exponential, l_inf, u_inf, [2.0, 3.0], Fminbox(), Optim_gf.Options())
+            @test Optim_gf.converged(res)
+            @test Optim_gf.minimizer(res) ≈ [2.0, 3.0]
         
             # initial_mu unit tests
-            box_inf = Optim.BoxBarrier(l_inf, u_inf)
-            @test Optim.initial_mu(box_inf, [0.0, 0.0], [1.0, 1.0], Fminbox()) == 0  # Inf case
-            @test Optim.initial_mu(box_inf, [0.0, 0.0], [0.0, 0.0], Fminbox()) == 0  # NaN case
+            box_inf = Optim_gf.BoxBarrier(l_inf, u_inf)
+            @test Optim_gf.initial_mu(box_inf, [0.0, 0.0], [1.0, 1.0], Fminbox()) == 0  # Inf case
+            @test Optim_gf.initial_mu(box_inf, [0.0, 0.0], [0.0, 0.0], Fminbox()) == 0  # NaN case
         
             # half-bounded box: a single finite bound must still give mu > 0
-            box_half = Optim.BoxBarrier([-Inf, 0.0], [Inf, Inf])
-            @test Optim.initial_mu(box_half, [0.0, 1.0], [1.0, 1.0], Fminbox()) > 0
+            box_half = Optim_gf.BoxBarrier([-Inf, 0.0], [Inf, Inf])
+            @test Optim_gf.initial_mu(box_half, [0.0, 1.0], [1.0, 1.0], Fminbox()) > 0
         
             # explicitly non-finite user-supplied mu0 should still throw
-            @test_throws ArgumentError Optim.initial_mu(box_inf, [0.0, 0.0], [1.0, 1.0],
+            @test_throws ArgumentError Optim_gf.initial_mu(box_inf, [0.0, 0.0], [1.0, 1.0],
                                                         Fminbox(LBFGS(); mu0 = Inf))
         end
     end
@@ -213,7 +213,7 @@ end
 
 @testset "#631" begin
     # Fminbox evaluates outside the box #861
-    # https://github.com/JuliaNLSolvers/Optim.jl/issues/861
+    # https://github.com/JuliaNLSolvers/Optim_gf.jl/issues/861
     for m in (GradientDescent(), ConjugateGradient(), BFGS(), LBFGS())
         optimize(
             x -> sqrt(x[1]),

@@ -11,22 +11,22 @@
         x0 = big.(prob.initial_x)
         res = optimize(f, x0)
         debug_printing && @show res
-        @test Optim.converged(res)
-        @test Optim.minimum(res) < 1e-8
-        @test Optim.minimizer(res) ≈ [1.0, 1.0] atol = 1e-4 rtol = 0
+        @test Optim_gf.converged(res)
+        @test Optim_gf.minimum(res) < 1e-8
+        @test Optim_gf.minimizer(res) ≈ [1.0, 1.0] atol = 1e-4 rtol = 0
 
 
         res = optimize(f, g!, x0)
         debug_printing && @show res
-        @test Optim.converged(res)
-        @test Optim.minimum(res) < 1e-16
-        @test Optim.minimizer(res) ≈ [1.0, 1.0] atol = 1e-8 rtol = 0
+        @test Optim_gf.converged(res)
+        @test Optim_gf.minimum(res) < 1e-16
+        @test Optim_gf.minimizer(res) ≈ [1.0, 1.0] atol = 1e-8 rtol = 0
 
         res = optimize(f, g!, h!, x0)
         debug_printing && @show res
-        @test Optim.converged(res)
-        @test Optim.minimum(res) < 1e-16
-        @test Optim.minimizer(res) ≈ [1.0, 1.0] atol = 1e-8 rtol = 0
+        @test Optim_gf.converged(res)
+        @test Optim_gf.minimum(res) < 1e-16
+        @test Optim_gf.minimizer(res) ≈ [1.0, 1.0] atol = 1e-8 rtol = 0
 
         lower = big.([-Inf, -Inf])
         upper = big.([0.5, 1.5])
@@ -37,15 +37,15 @@
             upper,
             x0,
             Fminbox(),
-            Optim.Options(
+            Optim_gf.Options(
                 outer_g_abstol = sqrt(eps(big(1.0))),
                 g_abstol = sqrt(eps(big(1.0))),
             ),
         )
         debug_printing && @show res
-        @test Optim.converged(res)
-        @test Optim.minimum(res) ≈ 0.25 atol = 1e-10 rtol = 0
-        @test Optim.minimizer(res) ≈ [0.5, 0.25] atol = 1e-10 rtol = 0
+        @test Optim_gf.converged(res)
+        @test Optim_gf.minimum(res) ≈ 0.25 atol = 1e-10 rtol = 0
+        @test Optim_gf.minimizer(res) ≈ [0.5, 0.25] atol = 1e-10 rtol = 0
 
         res = optimize(
             f,
@@ -53,15 +53,15 @@
             upper,
             x0,
             Fminbox(),
-            Optim.Options(
+            Optim_gf.Options(
                 outer_g_abstol = sqrt(eps(big(1.0))),
                 g_abstol = sqrt(eps(big(1.0))),
             ),
         )
         debug_printing && @show res
-        @test Optim.converged(res)
-        @test Optim.minimum(res) ≈ 0.25 atol = 1e-10 rtol = 0
-        @test Optim.minimizer(res) ≈ [0.5, 0.25] atol = 1e-10 rtol = 0
+        @test Optim_gf.converged(res)
+        @test Optim_gf.minimum(res) ≈ 0.25 atol = 1e-10 rtol = 0
+        @test Optim_gf.minimizer(res) ≈ [0.5, 0.25] atol = 1e-10 rtol = 0
     end
 end
 

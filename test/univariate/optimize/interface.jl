@@ -18,7 +18,7 @@
 
     model = yObj(1.0)
 
-    Optim.optimize(model, -1, 2, [1.0]) # already worked
-    Optim.optimize(model, -1, 2) # didn't work
-    Optim.optimize(model, -1.0, 2.0) # didn't work
+    Optim_gf.optimize(model, -1, 2, [1.0]) # already worked
+    Optim_gf.optimize(model, -1, 2) # didn't work
+    Optim_gf.optimize(model, -1.0, 2.0) # didn't work
 end

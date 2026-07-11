@@ -13,6 +13,6 @@
         NewtonTrustRegion,
         SimulatedAnnealing,
     )
-        result = Optim.optimize(f, x0, method())
+        result = Optim_gf.optimize(f, x0, method())
     end
 end

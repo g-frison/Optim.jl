@@ -14,7 +14,7 @@
             a += 1
             false
         end
-        options = Optim.Options(callback = cb, show_every = 3, store_trace = true)
+        options = Optim_gf.Options(callback = cb, show_every = 3, store_trace = true)
         res1 = optimize(f, initial_x, method, options)
         @test a == 1+res1.iterations
 
@@ -23,7 +23,7 @@
             b += 1
             false
         end
-        options = Optim.Options(callback = cb, show_every = 3)
+        options = Optim_gf.Options(callback = cb, show_every = 3)
         res2 = optimize(f, initial_x, method, options)
         @test b == 1+res2.iterations
 
@@ -32,7 +32,7 @@
         cb = _ -> begin
             return (iteration += 1) == 5
         end
-        options = Optim.Options(callback = cb)
+        options = Optim_gf.Options(callback = cb)
         res3 = optimize(f, zeros(2), NelderMead(), options)
         @test res3.iterations == 5
     end
@@ -43,7 +43,7 @@
             a += 1
             false
         end
-        options = Optim.Options(callback = cb, show_every = 3, store_trace = true)
+        options = Optim_gf.Options(callback = cb, show_every = 3, store_trace = true)
         res1 = optimize(d2, initial_x, method, options)
         @test a == 1+res1.iterations
 
@@ -52,7 +52,7 @@
             b += 1
             false
         end
-        options = Optim.Options(callback = cb, show_every = 3)
+        options = Optim_gf.Options(callback = cb, show_every = 3)
         res2 = optimize(d2, initial_x, method, options)
         @test b == 1+res2.iterations
 
@@ -61,7 +61,7 @@
             c += 1
             false
         end
-        options = Optim.Options(callback = cb)
+        options = Optim_gf.Options(callback = cb)
         res2 = optimize(d2, initial_x, method, options)
         @test c == 1+res2.iterations
     end
@@ -72,7 +72,7 @@
             a += 1
             false
         end
-        options = Optim.Options(callback = cb, show_every = 3, store_trace = true)
+        options = Optim_gf.Options(callback = cb, show_every = 3, store_trace = true)
         res1 = optimize(d3, initial_x, method, options)
         @test a == 1+res1.iterations
 
@@ -81,7 +81,7 @@
             b += 1
             false
         end
-        options = Optim.Options(callback = cb, show_every = 3)
+        options = Optim_gf.Options(callback = cb, show_every = 3)
         res2 = optimize(d3, initial_x, method, options)
         @test b == 1+res2.iterations
 
@@ -90,7 +90,7 @@
             c += 1
             false
         end
-        options = Optim.Options(callback = cb)
+        options = Optim_gf.Options(callback = cb)
         res2 = optimize(d3, initial_x, method, options)
         @test c == 1+res2.iterations
     end

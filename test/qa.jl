@@ -15,7 +15,7 @@ import JET
             Optim;
             # ExplicitImports does not support `@enumx`
             # Ref https://github.com/JuliaTesting/ExplicitImports.jl/issues/73
-            allow_unanalyzable = (Optim.TerminationCode,),
+            allow_unanalyzable = (Optim_gf.TerminationCode,),
         ) === nothing
 
         # All explicit imports (`using XY: Z`) are loaded via their owners
@@ -33,7 +33,7 @@ import JET
             Optim;
             # ExplicitImports does not support `@enumx`
             # Ref https://github.com/JuliaTesting/ExplicitImports.jl/issues/73
-            allow_unanalyzable = (Optim.TerminationCode,),
+            allow_unanalyzable = (Optim_gf.TerminationCode,),
         ) === nothing
 
         # Nothing is accessed via modules other than its owner

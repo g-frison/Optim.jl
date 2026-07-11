@@ -16,15 +16,15 @@ function runtests()
 end
 
 function test_SolverName()
-    @test MOI.get(Optim.Optimizer(), MOI.SolverName()) == "Optim"
+    @test MOI.get(Optim_gf.Optimizer(), MOI.SolverName()) == "Optim"
 end
 
 function test_supports_incremental_interface()
-    @test MOI.supports_incremental_interface(Optim.Optimizer())
+    @test MOI.supports_incremental_interface(Optim_gf.Optimizer())
 end
 
 function test_MOI_Test()
-    model = MOI.instantiate(Optim.Optimizer; with_cache_type = Float64)
+    model = MOI.instantiate(Optim_gf.Optimizer; with_cache_type = Float64)
     MOI.set(model, MOI.Silent(), true)
     MOI.Test.runtests(
         model,
@@ -55,4 +55,4 @@ end
 
 end # module TestOptim
 
-TestOptim.runtests()
+TestOptim_gf.runtests()

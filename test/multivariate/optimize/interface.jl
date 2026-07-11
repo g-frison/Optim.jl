@@ -7,44 +7,44 @@
     od = OnceDifferentiable(f, g!, fill!(similar(problem.initial_x), 0))
     td = TwiceDifferentiable(f, g!, h!, fill!(similar(problem.initial_x), 0))
     tdref = TwiceDifferentiable(f, g!, h!, fill!(similar(problem.initial_x), 0))
-    ref = optimize(tdref, problem.initial_x, Newton(), Optim.Options())
+    ref = optimize(tdref, problem.initial_x, Newton(), Optim_gf.Options())
     # test AbstractObjective interface
     for obj in (nd, od, td)
         res = []
         push!(res, optimize(obj, problem.initial_x))
 
-        push!(res, optimize(obj, problem.initial_x, Optim.Options()))
+        push!(res, optimize(obj, problem.initial_x, Optim_gf.Options()))
 
         for r in res
-            @test norm(Optim.minimum(ref) - Optim.minimum(r)) < 1e-6
+            @test norm(Optim_gf.minimum(ref) - Optim_gf.minimum(r)) < 1e-6
         end
     end
     ad_res = optimize(od, problem.initial_x, Newton())
-    @test norm(Optim.minimum(ref) - Optim.minimum(ad_res)) < 1e-6
+    @test norm(Optim_gf.minimum(ref) - Optim_gf.minimum(ad_res)) < 1e-6
     ad_res2 = optimize(od, problem.initial_x, Newton())
-    @test norm(Optim.minimum(ref) - Optim.minimum(ad_res2)) < 1e-6
+    @test norm(Optim_gf.minimum(ref) - Optim_gf.minimum(ad_res2)) < 1e-6
     # test f, g!, h! interface
     for tup in ((f,), (f, g!), (f, g!, h!))
         fgh_res = []
         push!(fgh_res, optimize(tup..., problem.initial_x))
         for m in (NelderMead(), LBFGS(), Newton())
             push!(fgh_res, optimize(tup..., problem.initial_x, m))
-            push!(fgh_res, optimize(tup..., problem.initial_x, m, Optim.Options()))
+            push!(fgh_res, optimize(tup..., problem.initial_x, m, Optim_gf.Options()))
         end
         for r in fgh_res
-            @test norm(Optim.minimum(ref) - Optim.minimum(r)) < 1e-6
+            @test norm(Optim_gf.minimum(ref) - Optim_gf.minimum(r)) < 1e-6
         end
     end
-    # simple tests for https://github.com/JuliaNLSolvers/Optim.jl/issues/805
+    # simple tests for https://github.com/JuliaNLSolvers/Optim_gf.jl/issues/805
     @test AcceleratedGradientDescent(alphaguess = 1.0).alphaguess! isa
-          Optim.LineSearches.InitialStatic
-    @test BFGS(alphaguess = 1.0).alphaguess! isa Optim.LineSearches.InitialStatic
+          Optim_gf.LineSearches.InitialStatic
+    @test BFGS(alphaguess = 1.0).alphaguess! isa Optim_gf.LineSearches.InitialStatic
     @test ConjugateGradient(alphaguess = 1.0).alphaguess! isa
-          Optim.LineSearches.InitialStatic
-    @test GradientDescent(alphaguess = 1.0).alphaguess! isa Optim.LineSearches.InitialStatic
+          Optim_gf.LineSearches.InitialStatic
+    @test GradientDescent(alphaguess = 1.0).alphaguess! isa Optim_gf.LineSearches.InitialStatic
     @test MomentumGradientDescent(alphaguess = 1.0).alphaguess! isa
-          Optim.LineSearches.InitialStatic
-    @test Newton(alphaguess = 1.0).alphaguess! isa Optim.LineSearches.InitialStatic
+          Optim_gf.LineSearches.InitialStatic
+    @test Newton(alphaguess = 1.0).alphaguess! isa Optim_gf.LineSearches.InitialStatic
     optimize(od, problem.initial_x, AcceleratedGradientDescent(alphaguess = 1.0))
     optimize(od, problem.initial_x, BFGS(alphaguess = 1.0))
     optimize(od, problem.initial_x, ConjugateGradient(alphaguess = 1.0))
@@ -79,9 +79,9 @@ end
         nothing
     end
 
-    result_fg! = Optim.optimize(NLSolversBase.only_fg!(fg!), [0.0, 0.0], Optim.LBFGS()) # works fine
+    result_fg! = Optim_gf.optimize(NLSolversBase.only_fg!(fg!), [0.0, 0.0], Optim_gf.LBFGS()) # works fine
     @test result_fg!.minimizer ≈ [1, 1]
-    result_fgh! = Optim.optimize(NLSolversBase.only_fgh!(fgh!), [0.0, 0.0], Optim.Newton())
+    result_fgh! = Optim_gf.optimize(NLSolversBase.only_fgh!(fgh!), [0.0, 0.0], Optim_gf.Newton())
     @test result_fgh!.minimizer ≈ [1, 1]
 end
 
@@ -93,10 +93,10 @@ end
     g(x) = 2x
     h!(H, x) = @. H = [2.0 0.0; 0.0 2.0]
     _hvp!(HVP, x, v) = @. HVP = [2.0, 2.0] .* v
-    res = Optim.optimize(f, w)
+    res = Optim_gf.optimize(f, w)
     @test res.method isa NelderMead
 
-    res = Optim.optimize(f, g!, w)
+    res = Optim_gf.optimize(f, g!, w)
     @test res.method isa LBFGS
     function fg!(_, G, x)
         isnothing(G) || g!(G, x)
@@ -106,13 +106,13 @@ end
         return f(x), g(x)
     end
 
-    res = Optim.optimize(NLSolversBase.only_fg!(fg!), w)
+    res = Optim_gf.optimize(NLSolversBase.only_fg!(fg!), w)
     @test res.method isa LBFGS
 
-    res = Optim.optimize(NLSolversBase.only_fg(fg), w)
+    res = Optim_gf.optimize(NLSolversBase.only_fg(fg), w)
     @test res.method isa LBFGS
 
-    res = Optim.optimize(NLSolversBase.only_g_and_fg(g, fg), w)
+    res = Optim_gf.optimize(NLSolversBase.only_g_and_fg(g, fg), w)
     @test res.method isa LBFGS
 
     function fgh!(_, G, H, x)
@@ -121,10 +121,10 @@ end
         return f(x)
     end
 
-    res = Optim.optimize(NLSolversBase.only_fgh!(fgh!), w)
+    res = Optim_gf.optimize(NLSolversBase.only_fgh!(fgh!), w)
     @test res.method isa Newton
 
-    res = Optim.optimize(NLSolversBase.only_fgh!(fgh!), w)
+    res = Optim_gf.optimize(NLSolversBase.only_fgh!(fgh!), w)
     @test res.method isa Newton
 
     function fghvp!(_, G, HVP, x, v)
@@ -133,10 +133,10 @@ end
         return f(x)
     end
 
-    res = Optim.optimize(NLSolversBase.only_fghvp!(fghvp!), w)
-    @test res.method isa Optim.KrylovTrustRegion
+    res = Optim_gf.optimize(NLSolversBase.only_fghvp!(fghvp!), w)
+    @test res.method isa Optim_gf.KrylovTrustRegion
 
-    res = Optim.optimize(NLSolversBase.only_fg_and_hvp!(fg!, _hvp!), w)
-    @test res.method isa Optim.KrylovTrustRegion
+    res = Optim_gf.optimize(NLSolversBase.only_fg_and_hvp!(fg!, _hvp!), w)
+    @test res.method isa Optim_gf.KrylovTrustRegion
 
 end

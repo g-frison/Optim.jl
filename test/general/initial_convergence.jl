@@ -16,11 +16,11 @@
     )
 
         res = optimize(f, g!, [0.0], Optimizer())
-        @test Optim.minimizer(res)[1] ≈ 0.0
+        @test Optim_gf.minimizer(res)[1] ≈ 0.0
     end
 
     for Optimizer in (Newton, NewtonTrustRegion)
         res = optimize(f, g!, h!, [0.0], Optimizer())
-        @test Optim.minimizer(res)[1] ≈ 0.0
+        @test Optim_gf.minimizer(res)[1] ≈ 0.0
     end
 end

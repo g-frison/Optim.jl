@@ -4,24 +4,24 @@
     function f_s(x::Vector)
         (x[1] - 5.0)^4
     end
-    options = Optim.Options(iterations = 100_000)
-    results = Optim.optimize(f_s, [0.0], SimulatedAnnealing(), options)
-    @test norm(Optim.minimizer(results) - [5.0]) < 0.1
+    options = Optim_gf.Options(iterations = 100_000)
+    results = Optim_gf.optimize(f_s, [0.0], SimulatedAnnealing(), options)
+    @test norm(Optim_gf.minimizer(results) - [5.0]) < 0.1
 
     function rosenbrock_s(x::Vector)
         (1.0 - x[1])^2 + 100.0 * (x[2] - x[1]^2)^2
     end
-    options = Optim.Options(iterations = 100_000)
-    results = Optim.optimize(rosenbrock_s, [0.0, 0.0], SimulatedAnnealing(), options)
-    @test norm(Optim.minimizer(results) - [1.0, 1.0]) < 0.1
+    options = Optim_gf.Options(iterations = 100_000)
+    results = Optim_gf.optimize(rosenbrock_s, [0.0, 0.0], SimulatedAnnealing(), options)
+    @test norm(Optim_gf.minimizer(results) - [1.0, 1.0]) < 0.1
 
-    options = Optim.Options(
+    options = Optim_gf.Options(
         iterations = 10,
         show_trace = true,
         store_trace = true,
         extended_trace = true,
     )
-    results = Optim.optimize(rosenbrock_s, [0.0, 0.0], SimulatedAnnealing(), options)
+    results = Optim_gf.optimize(rosenbrock_s, [0.0, 0.0], SimulatedAnnealing(), options)
 
     # Max-cut problem, https://en.wikipedia.org/wiki/Maximum_cut
     maxcut_objective(x::AbstractVector, J::AbstractMatrix{Bool}) = x' * (J * x)
@@ -47,13 +47,13 @@
     J = makeJ(n, p)
     edwards_bound = -sum(J) / 4 - (n - 1) / 4
     method = SimulatedAnnealing(; neighbor=(xc, xp) -> maxcut_spinflip!(xc, xp, 2/n))
-    options = Optim.Options(; iterations = 100_000)
+    options = Optim_gf.Options(; iterations = 100_000)
     x0 = rand([-1.0, 1.0], n)
     # Ensure the initialization is worse than the Edwards bound
     while maxcut_objective(x0, J) <= edwards_bound
         x0 = rand([-1.0, 1.0], n)
     end
-    results = Optim.optimize(x -> maxcut_objective(x, J), x0, method, options)
-    xf = Optim.minimizer(results)
+    results = Optim_gf.optimize(x -> maxcut_objective(x, J), x0, method, options)
+    xf = Optim_gf.minimizer(results)
     @test maxcut_objective(xf, J) < edwards_bound
 end

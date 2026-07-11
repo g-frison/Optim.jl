@@ -14,9 +14,9 @@ Random.seed!(3288)
             xtrue ./ 1.1,
             xtrue .* 1.1,
             xtrue .* 1.02,
-            Optim.SAMIN(t0 = 1.0, r_expand = 2.0, verbosity = 0),
-            Optim.Options(iterations = 10000),
+            Optim_gf.SAMIN(t0 = 1.0, r_expand = 2.0, verbosity = 0),
+            Optim_gf.Options(iterations = 10000),
         )
-        @test abs(prob.minimum-Optim.minimum(res)) < 1e-5
+        @test abs(prob.minimum-Optim_gf.minimum(res)) < 1e-5
     end
 end

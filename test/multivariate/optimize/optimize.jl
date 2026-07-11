@@ -18,20 +18,20 @@
     end
 
     results = optimize(f1, g1, h1, [127.0, 921.0])
-    @test Optim.g_converged(results)
-    @test norm(Optim.minimizer(results) - [0.0, 0.0]) < 0.01
+    @test Optim_gf.g_converged(results)
+    @test norm(Optim_gf.minimizer(results) - [0.0, 0.0]) < 0.01
 
     results = optimize(f1, g1, [127.0, 921.0])
-    @test Optim.g_converged(results)
-    @test norm(Optim.minimizer(results) - [0.0, 0.0]) < 0.01
+    @test Optim_gf.g_converged(results)
+    @test norm(Optim_gf.minimizer(results) - [0.0, 0.0]) < 0.01
 
     results = optimize(f1, [127.0, 921.0])
-    @test Optim.g_converged(results)
-    @test norm(Optim.minimizer(results) - [0.0, 0.0]) < 0.01
+    @test Optim_gf.g_converged(results)
+    @test norm(Optim_gf.minimizer(results) - [0.0, 0.0]) < 0.01
 
     results = optimize(f1, [127.0, 921.0])
-    @test Optim.g_converged(results)
-    @test norm(Optim.minimizer(results) - [0.0, 0.0]) < 0.01
+    @test Optim_gf.g_converged(results)
+    @test norm(Optim_gf.minimizer(results) - [0.0, 0.0]) < 0.01
 
     # tests for bfgs_initial_invH
     initial_invH = zeros(2, 2)
@@ -42,10 +42,10 @@
         g1,
         [127.0, 921.0],
         BFGS(initial_invH = x -> initial_invH),
-        Optim.Options(),
+        Optim_gf.Options(),
     )
-    @test Optim.g_converged(results)
-    @test norm(Optim.minimizer(results) - [0.0, 0.0]) < 0.01
+    @test Optim_gf.g_converged(results)
+    @test norm(Optim_gf.minimizer(results) - [0.0, 0.0]) < 0.01
 
     # test timeout
     function f2(x)
@@ -53,9 +53,9 @@
         (1.0 / 2.0) * (x[1]^2 + eta * x[2]^2)
     end
 
-    results = optimize(f2, g1, [127.0, 921.0], BFGS(), Optim.Options(; time_limit = 0.0))
-    @test !Optim.g_converged(results)
-    @test Optim.time_limit(results) < Optim.time_run(results)
+    results = optimize(f2, g1, [127.0, 921.0], BFGS(), Optim_gf.Options(; time_limit = 0.0))
+    @test !Optim_gf.g_converged(results)
+    @test Optim_gf.time_limit(results) < Optim_gf.time_run(results)
 end
 
 @testset "#718" begin

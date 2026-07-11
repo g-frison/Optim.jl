@@ -26,7 +26,7 @@ promote_objtype(method::IPNewton, x, autodiff::ADTypes.AbstractADType, inplace::
 # Interior-point Newton
 ## Constructor
 ```julia-repl
-IPNewton(; linesearch::Function = Optim.backtrack_constrained_grad,
+IPNewton(; linesearch::Function = Optim_gf.backtrack_constrained_grad,
          μ0::Union{Symbol,Number} = :auto,
          show_linesearch::Bool = false)
 ```
@@ -36,7 +36,7 @@ to `:auto` to let the algorithm decide its value, see `initialize_μ_λ!`.
 
 *Note*: For constrained optimization problems, we recommend
 always enabling `allow_f_increases` and `successive_f_tol` in the options passed to `optimize`.
-The default is set to `Optim.Options(allow_f_increases = true, successive_f_tol = 2)`.
+The default is set to `Optim_gf.Options(allow_f_increases = true, successive_f_tol = 2)`.
 
 As of February 2018, the line search algorithm is specialised for constrained
 interior-point methods. In future we hope to support more algorithms from
@@ -48,7 +48,7 @@ nonlinear, constrained optimization problems. See Nocedal and Wright (Ch. 19, 20
 interior-point methods for constrained optimization.
 
 ## References
-The algorithm was [originally written by Tim Holy](https://github.com/JuliaNLSolvers/Optim.jl/pull/303) (@timholy, tim.holy@gmail.com).
+The algorithm was [originally written by Tim Holy](https://github.com/JuliaNLSolvers/Optim_gf.jl/pull/303) (@timholy, tim.holy@gmail.com).
 
  - J Nocedal, SJ Wright (2006), Numerical optimization, second edition. Springer.
  - A Wächter, LT Biegler (2006), On the implementation of an interior-point filter line-search algorithm for large-scale nonlinear programming. Mathematical Programming 106 (1), 25-57.

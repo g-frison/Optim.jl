@@ -6,13 +6,13 @@
     end
 
     initial_x = [1.0]
-    options = Optim.Options(
+    options = Optim_gf.Options(
         show_trace = debug_printing,
         allow_f_increases = true,
         iterations = 100_000,
     )
-    results = Optim.optimize(f, g!, initial_x, Adam(), options)
-    @test norm(Optim.minimum(results)) < 1e-6
+    results = Optim_gf.optimize(f, g!, initial_x, Adam(), options)
+    @test norm(Optim_gf.minimum(results)) < 1e-6
     test_summary(results, "Adam")
 
     # TODO: Check why skip problems fail
@@ -45,13 +45,13 @@ end
     end
 
     initial_x = [1.0]
-    options = Optim.Options(
+    options = Optim_gf.Options(
         show_trace = debug_printing,
         allow_f_increases = true,
         iterations = 100_000,
     )
-    results = Optim.optimize(f, g!, initial_x, AdaMax(), options)
-    @test norm(Optim.minimum(results)) < 1e-6
+    results = Optim_gf.optimize(f, g!, initial_x, AdaMax(), options)
+    @test norm(Optim_gf.minimum(results)) < 1e-6
     test_summary(results, "AdaMax")
 
     # TODO: Check why skip problems fail
@@ -87,28 +87,28 @@ end
     end
 
     initial_x = [1.0]
-    options = Optim.Options(
+    options = Optim_gf.Options(
         show_trace = debug_printing,
         allow_f_increases = true,
         iterations = 100_000,
     )
     alpha_scheduler(iter) = 0.0001 * (1 + 0.99^iter)
-    results = Optim.optimize(f, g!, initial_x, Adam(alpha = alpha_scheduler), options)
-    @test norm(Optim.minimum(results)) < 1e-6
+    results = Optim_gf.optimize(f, g!, initial_x, Adam(alpha = alpha_scheduler), options)
+    @test norm(Optim_gf.minimum(results)) < 1e-6
     test_summary(results, "Adam")
 
     # verifying the alpha values over iterations and also testing extended_trace
     # this way we test both alpha scheduler and the working of
     # extended_trace=true option
 
-    options = Optim.Options(
+    options = Optim_gf.Options(
         show_trace = debug_printing,
         allow_f_increases = true,
         iterations = 1000,
         extended_trace = true,
         store_trace = true,
     )
-    results = Optim.optimize(f, g!, initial_x, Adam(alpha = 1e-5), options)
+    results = Optim_gf.optimize(f, g!, initial_x, Adam(alpha = 1e-5), options)
 
     @test prod(
         map(
@@ -117,14 +117,14 @@ end
         ) .== 1e-5,
     )
 
-    options = Optim.Options(
+    options = Optim_gf.Options(
         show_trace = debug_printing,
         allow_f_increases = true,
         iterations = 1000,
         extended_trace = true,
         store_trace = true,
     )
-    results = Optim.optimize(f, g!, initial_x, Adam(alpha = alpha_scheduler), options)
+    results = Optim_gf.optimize(f, g!, initial_x, Adam(alpha = alpha_scheduler), options)
 
     @test map(
         iter -> results.trace[iter].metadata["Current step size"],
@@ -140,28 +140,28 @@ end
     end
 
     initial_x = [1.0]
-    options = Optim.Options(
+    options = Optim_gf.Options(
         show_trace = debug_printing,
         allow_f_increases = true,
         iterations = 100_000,
     )
     alpha_scheduler(iter) = 0.002 * (1 + 0.99^iter)
-    results = Optim.optimize(f, g!, initial_x, AdaMax(alpha = alpha_scheduler), options)
-    @test norm(Optim.minimum(results)) < 1e-6
+    results = Optim_gf.optimize(f, g!, initial_x, AdaMax(alpha = alpha_scheduler), options)
+    @test norm(Optim_gf.minimum(results)) < 1e-6
     test_summary(results, "AdaMax")
 
     # verifying the alpha values over iterations and also testing extended_trace
     # this way we test both alpha scheduler and the working of
     # extended_trace=true option
 
-    options = Optim.Options(
+    options = Optim_gf.Options(
         show_trace = debug_printing,
         allow_f_increases = true,
         iterations = 1000,
         extended_trace = true,
         store_trace = true,
     )
-    results = Optim.optimize(f, g!, initial_x, AdaMax(alpha = 1e-4), options)
+    results = Optim_gf.optimize(f, g!, initial_x, AdaMax(alpha = 1e-4), options)
 
     @test prod(
         map(
@@ -170,14 +170,14 @@ end
         ) .== 1e-4,
     )
 
-    options = Optim.Options(
+    options = Optim_gf.Options(
         show_trace = debug_printing,
         allow_f_increases = true,
         iterations = 1000,
         extended_trace = true,
         store_trace = true,
     )
-    results = Optim.optimize(f, g!, initial_x, AdaMax(alpha = alpha_scheduler), options)
+    results = Optim_gf.optimize(f, g!, initial_x, AdaMax(alpha = alpha_scheduler), options)
 
     @test map(
         iter -> results.trace[iter].metadata["Current step size"],

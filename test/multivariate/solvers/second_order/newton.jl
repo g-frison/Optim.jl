@@ -12,14 +12,14 @@
     end
     initial_x = [0.0]
 
-    Optim.optimize(NonDifferentiable(f_1, initial_x), [0.0], Newton())
-    Optim.optimize(OnceDifferentiable(f_1, g!_1, initial_x), [0.0], Newton())
+    Optim_gf.optimize(NonDifferentiable(f_1, initial_x), [0.0], Newton())
+    Optim_gf.optimize(OnceDifferentiable(f_1, g!_1, initial_x), [0.0], Newton())
 
-    options = Optim.Options(store_trace = false, show_trace = false, extended_trace = true)
-    results = Optim.optimize(f_1, g!_1, h!_1, [0.0], Newton(), options)
-    @test_throws ErrorException Optim.x_trace(results)
-    @test Optim.g_converged(results)
-    @test norm(Optim.minimizer(results) - [5.0]) < 0.01
+    options = Optim_gf.Options(store_trace = false, show_trace = false, extended_trace = true)
+    results = Optim_gf.optimize(f_1, g!_1, h!_1, [0.0], Newton(), options)
+    @test_throws ErrorException Optim_gf.x_trace(results)
+    @test Optim_gf.g_converged(results)
+    @test norm(Optim_gf.minimizer(results) - [5.0]) < 0.01
 
     eta = 0.9
 
@@ -39,10 +39,10 @@
         storage[2, 2] = eta
     end
 
-    results = Optim.optimize(f_2, g!_2, h!_2, [127.0, 921.0], Newton())
-    @test_throws ErrorException Optim.x_trace(results)
-    @test Optim.g_converged(results)
-    @test norm(Optim.minimizer(results) - [0.0, 0.0]) < 0.01
+    results = Optim_gf.optimize(f_2, g!_2, h!_2, [127.0, 921.0], Newton())
+    @test_throws ErrorException Optim_gf.x_trace(results)
+    @test Optim_gf.g_converged(results)
+    @test norm(Optim_gf.minimizer(results) - [0.0, 0.0]) < 0.01
     test_summary(results, "Newton's Method")
 
     @testset "newton in concave region" begin
@@ -54,7 +54,7 @@
             [0.0, 0.0],
             Newton(),
         )
-        @test norm(Optim.minimizer(res) - prob.solutions) < 1e-9
+        @test norm(Optim_gf.minimizer(res) - prob.solutions) < 1e-9
     end
 
     @testset "Optim problems" begin

@@ -18,20 +18,20 @@
     end
 
     results = optimize(f1, g1, h1, [127.0, 921.0])
-    @test Optim.g_converged(results)
-    @test norm(Optim.minimizer(results) - [0.0, 0.0]) < 0.01
+    @test Optim_gf.g_converged(results)
+    @test norm(Optim_gf.minimizer(results) - [0.0, 0.0]) < 0.01
 
     results = optimize(f1, g1, [127.0, 921.0])
-    @test Optim.g_converged(results)
-    @test norm(Optim.minimizer(results) - [0.0, 0.0]) < 0.01
+    @test Optim_gf.g_converged(results)
+    @test norm(Optim_gf.minimizer(results) - [0.0, 0.0]) < 0.01
 
     results = optimize(f1, [127.0, 921.0])
-    @test Optim.g_converged(results)
-    @test norm(Optim.minimizer(results) - [0.0, 0.0]) < 0.01
+    @test Optim_gf.g_converged(results)
+    @test norm(Optim_gf.minimizer(results) - [0.0, 0.0]) < 0.01
 
     results = optimize(f1, [127.0, 921.0])
-    @test Optim.g_converged(results)
-    @test norm(Optim.minimizer(results) - [0.0, 0.0]) < 0.01
+    @test Optim_gf.g_converged(results)
+    @test norm(Optim_gf.minimizer(results) - [0.0, 0.0]) < 0.01
 
     # tests for bfgs_initial_invH
     initial_invH = zeros(2, 2)
@@ -42,37 +42,37 @@
         g1,
         [127.0, 921.0],
         BFGS(initial_invH = x -> initial_invH),
-        Optim.Options(),
+        Optim_gf.Options(),
     )
-    @test Optim.g_converged(results)
-    @test norm(Optim.minimizer(results) - [0.0, 0.0]) < 0.01
+    @test Optim_gf.g_converged(results)
+    @test norm(Optim_gf.minimizer(results) - [0.0, 0.0]) < 0.01
 
     # Tests for PR #302
     results = optimize(cos, 0, 2pi)
-    @test norm(Optim.minimizer(results) - pi) < 0.01
+    @test norm(Optim_gf.minimizer(results) - pi) < 0.01
     results = optimize(cos, 0.0, 2pi)
-    @test norm(Optim.minimizer(results) - pi) < 0.01
+    @test norm(Optim_gf.minimizer(results) - pi) < 0.01
     results = optimize(cos, 0, 2pi, Brent())
-    @test norm(Optim.minimizer(results) - pi) < 0.01
+    @test norm(Optim_gf.minimizer(results) - pi) < 0.01
     results = optimize(cos, 0.0, 2pi, Brent())
-    @test norm(Optim.minimizer(results) - pi) < 0.01
+    @test norm(Optim_gf.minimizer(results) - pi) < 0.01
     results = optimize(cos, 0, 2pi, method = Brent())
-    @test norm(Optim.minimizer(results) - pi) < 0.01
+    @test norm(Optim_gf.minimizer(results) - pi) < 0.01
     results = optimize(cos, 0.0, 2pi, method = Brent())
-    @test norm(Optim.minimizer(results) - pi) < 0.01
+    @test norm(Optim_gf.minimizer(results) - pi) < 0.01
 end
 
 
 @testset "nm trace" begin
-    # https://github.com/JuliaNLSolvers/Optim.jl/issues/1112
+    # https://github.com/JuliaNLSolvers/Optim_gf.jl/issues/1112
     f(x) = (x[1]^2 + x[2] - 11)^2 + (x[1] + x[2]^2 - 7)^2
 
     x0 = [0.0, 0.0]
-    opt = Optim.Options(store_trace = true, trace_simplex = true, extended_trace = true)
+    opt = Optim_gf.Options(store_trace = true, trace_simplex = true, extended_trace = true)
     res = optimize(f, x0, NelderMead(), opt)
-    tr = Optim.simplex_trace(res)
-    trval = Optim.simplex_value_trace(res)
-    trcent = Optim.centroid_trace(res)
+    tr = Optim_gf.simplex_trace(res)
+    trval = Optim_gf.simplex_value_trace(res)
+    trcent = Optim_gf.centroid_trace(res)
     @test tr[end] != tr[end-1]
     @test trval[end] != trval[end-1]
     @test trcent[end] != trcent[end-1]
@@ -88,24 +88,24 @@ end
     end
 
     # To set tight tolerance on gradient g, need to disable any check on f
-    options = Optim.Options(g_abstol = 1e-10, f_reltol = NaN, f_abstol = NaN)
-    result = Optim.optimize(
+    options = Optim_gf.Options(g_abstol = 1e-10, f_reltol = NaN, f_abstol = NaN)
+    result = Optim_gf.optimize(
         rosenbrock,
         g_rosenbrock!,
         zeros(2),
-        Optim.ConjugateGradient(),
+        Optim_gf.ConjugateGradient(),
         options,
     )
-    @test Optim.g_residual(result) < 1e-10
+    @test Optim_gf.g_residual(result) < 1e-10
 
     # To set tight tolerance on x, need to also disable default gradient tolerance, g_tol=1e-8
-    options = Optim.Options(x_abstol = 1e-10, g_abstol = NaN, f_reltol = NaN, f_abstol = NaN)
-    result = Optim.optimize(
+    options = Optim_gf.Options(x_abstol = 1e-10, g_abstol = NaN, f_reltol = NaN, f_abstol = NaN)
+    result = Optim_gf.optimize(
         rosenbrock,
         g_rosenbrock!,
         zeros(2),
-        Optim.ConjugateGradient(),
+        Optim_gf.ConjugateGradient(),
         options,
     )
-    @test Optim.x_abschange(result) < 1e-10
+    @test Optim_gf.x_abschange(result) < 1e-10
 end

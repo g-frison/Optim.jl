@@ -168,7 +168,7 @@ function solve_tr_subproblem!(gr, H, delta, s; tolerance = 1e-10, max_iters = 5)
 
         if !hard_case
             # Algorithm 4.3 of N&W (2006), with s instead of p_l for consistency
-            # with Optim.jl
+            # with Optim_gf.jl
 
             reached_solution = false
             for iter = 1:max_iters

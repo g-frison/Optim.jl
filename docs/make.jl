@@ -70,4 +70,4 @@ makedocs(
     plugins = [bib],
 )
 
-deploydocs(repo = "github.com/JuliaNLSolvers/Optim.jl.git")
+deploydocs(repo = "github.com/JuliaNLSolvers/Optim_gf.jl.git")

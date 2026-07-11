@@ -14,7 +14,7 @@ prints help to the terminal.
 Besides the help provided at the REPL, it is possible to find help and general
 documentation online at http://julianlsolvers.github.io/Optim.jl/stable/ .
 """
-module Optim
+module Optim_gf
 
 import ADTypes
 

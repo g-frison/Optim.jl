@@ -507,8 +507,7 @@ end
 
 function compute_cost!(f, n_particles::Int, X::Matrix, score::Vector)
 
-    Threads.@threads for i = 1:n_particles
-        score[i] = value(f, X[:, i])
-    end
-    nothing
+        scores = pmap(i -> value(f, X[:, i]), 1:n_particles)
+        score .= scores
+    
 end

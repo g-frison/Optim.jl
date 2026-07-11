@@ -108,6 +108,7 @@ function initial_state(
             n_particles = 3
         else
             n_particles = method.n_particles
+            print("well done ! number of particles > 3")
         end
     else
         # user did not define number of particles
@@ -134,7 +135,7 @@ function initial_state(
     # if search space is limited, spread the initial population
     # uniformly over the whole search space
     if limit_search_space
-        for i = 1:n_particles
+        Threads.@threads for i = 1:n_particles
             for j = 1:n
                 ww = upper[j] - lower[j]
                 X[j, i] = lower[j] + ww * rand(T)
@@ -143,7 +144,7 @@ function initial_state(
             end
         end
     else
-        for i = 1:n_particles
+        Threads.@threads for i = 1:n_particles
             for j = 1:n
                 if i == 1
                     if abs(x0[i]) > T(0)
@@ -290,7 +291,7 @@ function update_swarm!(
     c2,
 ) where {Tx}
     # compute new positions for the swarm particles
-    for i = 1:n_particles
+    Threads.@threads for i = 1:n_particles
         for j = 1:n
             r1 = rand(Tx)
             r2 = rand(Tx)
@@ -507,7 +508,7 @@ end
 
 function compute_cost!(f, n_particles::Int, X::Matrix, score::Vector)
 
-    for i = 1:n_particles
+    Threads.@threads for i = 1:n_particles
         score[i] = value(f, X[:, i])
     end
     nothing

@@ -108,7 +108,6 @@ function initial_state(
             n_particles = 3
         else
             n_particles = method.n_particles
-            print("well done ! number of particles > 3")
         end
     else
         # user did not define number of particles
